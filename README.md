@@ -87,7 +87,7 @@ habitat-lab
 
 ## Download Data
 
-You can download the data [here]().
+You can download the data [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EoYVFXO2_3lNhho_7LdmAU4B9A669tgjNbSd0ukc_AKXtQ?e=E8h6oB).
 
 
 ## Creating Datasets
@@ -97,7 +97,7 @@ You can download the data [here]().
     ```
     This will generate the data for imitation learning. (takes around ~24hours)
     You can find some examples of the collected data in *IL_data/gibson* folder, and look into them with  *show_IL_data.ipynb*.
-    You can also download the collected il data from [here]().
+    You can also download the collected il data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EkGTdtVgaMVCvPMHNDjsxlcBoSN2wwzn83gXeF7vT2_Dfg?e=0C1HBD).
 
 2. Collect Topological Semantic Graph for Imitation Learning 
     ```
@@ -105,7 +105,7 @@ You can download the data [here]().
     ```
     This will generate the graph data for training the TSGM model. (takes around ~3hours)
     You can find some examples of the collected graph data in *IL_data/gibson_graph* folder, and look into them with  *show_graph_data.ipynb*.
-    You can also download the collected graph data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EkGTdtVgaMVCvPMHNDjsxlcBoSN2wwzn83gXeF7vT2_Dfg?e=Z39TGP).
+    You can also download the collected graph data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EmvaMrQID5NKoQ7SA04eu-gBSIgiDESRznpR7qLw2zjmJQ?e=bPF85T).
 
 ## Training
 1. Imitation Learning
@@ -134,25 +134,18 @@ Or, you can evaluate the pretrained model with:
 ```
 python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --eval-ckpt ./data/best_ckpts/tsgm_rl.pth --gpu 0
 ```
-* Trained model parameters will be released soon.
 
-[//]: # (### Results)
+### Results
 
-[//]: # (Expected results for TSGM from running the code)
+Expected results for TSGM from running the code
 
-[//]: # (|  Model  |                              Test set                               | Easy &#40;SR&#41; | Easy &#40;SPL&#41; | Medium &#40;SR&#41; | Medium &#40;SPL&#41; |  Hard &#40;SR&#41;   | Hard &#40;SPL&#41; | Overall &#40;SR&#41; | Overall &#40;SPL&#41; |)
-
-[//]: # (|:-------:|:-------------------------------------------------------------------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:------------:|:-------------:|)
-
-[//]: # (| TSGM-IL |      [VGM]&#40;https://rllab-snu.github.io/projects/vgm/doc.html&#41;       |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |    70.97     |      52.81    |)
-
-[//]: # (| TSGM-RL |      [VGM]&#40;https://rllab-snu.github.io/projects/vgm/doc.html&#41;       |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |)
-
-[//]: # (| TSGM-RL |         [NRNS-straight]&#40;https://github.com/meera1hahn/NRNS&#41;         |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |)
-
-[//]: # (| TSGM-RL |          [NRNS-curved]&#40;https://github.com/meera1hahn/NRNS&#41;          |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |)
-
-[//]: # (| TSGM-RL |  [Meta]&#40;https://github.com/facebookresearch/image-goal-nav-dataset&#41; |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |)
+|  Model  |                              Test set                               | Easy (SR) | Easy (SPL) | Medium (SR) | Medium (SPL) | Hard (SR) | Hard (SPL) | Overall (SR) | Overall (SPL) |
+|:-------:|:-------------------------------------------------------------------:|:---------:|:----------:|:-----------:|:------------:|:---------:|:----------:|:------------:|:-------------:|
+| TSGM-IL |      [VGM](https://rllab-snu.github.io/projects/vgm/doc.html)       |   76.76   |   59.54    |    72.99    |    53.67     |   63.16   |   45.21    |    70.97     |     52.81     |
+| TSGM-RL |      [VGM](https://rllab-snu.github.io/projects/vgm/doc.html)       |   91.86   |   85.25    |    82.03    |    68.10     |   70.30   |   49.98    |     81.4     |     67.78     |
+| TSGM-RL |         [NRNS-straight](https://github.com/meera1hahn/NRNS)         |   94.40   |   92.19    |    92.60    |    84.35     |   70.35   |   62.85    |    85.78     |     79.80     |
+| TSGM-RL |          [NRNS-curved](https://github.com/meera1hahn/NRNS)          |   93.60   |   91.04    |    89.70    |    77.88     |   64.20   |   55.03    |    82.50     |     74.13     |
+| TSGM-RL |  [Meta](https://github.com/facebookresearch/image-goal-nav-dataset) |   90.79   |   86.93    |    85.43    |    72.89     |   63.43   |   56.28    |    79.88     |     72.03     |
 
 ### Visualize the Results
 To visualize the TSGM from the recorded output from the evaluate (test with --record 3), please run the following command:
@@ -164,12 +157,10 @@ We release pre-trained models from the experiments in our paper:
 
 |      Method       |                    Train                    |       Checkpoints       |
 |:-----------------:|:-------------------------------------------:|:-----------------------:|
-|       TSGM        |             Imitation Learning              |     [tsgm_il.pth]()     |
-|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth]()     |
-| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar]() |
-| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar]() |
-
-* Checkpoint will be released soon.
+|       TSGM        |             Imitation Learning              |     [tsgm_il.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EfCG8qKkuIFCjQrj2LIqIKYBKXuJ1NV2dzsrV9HuXIsADQ?e=xjm146)     |
+|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EbYjg9RZoH5JoZvr941A2mMBvwlGyJAexdychHVQUAYirw?e=Hq8WTo)     |
+| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/Eb6Xa9AdaLVJmqbIrujfIeMBfor6bA_svioih4R2XGPIkA?e=xm4hhE) |
+| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/ESJwR8YHqgRNpErupUo2DVEBf9k7csRECl6hyDA3Xs5seQ?e=hIEBPN) |
 
 ## Citation
 If you find this code useful for your research, please consider citing:
