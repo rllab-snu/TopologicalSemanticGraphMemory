@@ -195,5 +195,4 @@ dependencies:
     - wheel==0.37.1
     - yacs==0.1.8
     - zipp==3.8.1
-    - cudatoolkit==10.1
 prefix: /home/blackfoot/anaconda3/envs/tsgm
