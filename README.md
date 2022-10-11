@@ -43,7 +43,18 @@ To start, we prefer creating the environment using conda:
 
 ```
 conda env create -f environment.yml
+conda create -n tsgm python=3.7 cmake=3.14.0
 conda activate tsgm
+conda install habitat-sim==0.2.1 withbullet headless -c conda-forge -c aihabitat
+cd 
+mkdir programs
+cd programs
+git clone --branch stable https://github.com/facebookresearch/habitat-lab.git habitat-lab-v21
+cd habitat-lab-v21
+git checkout tags/v0.2.1
+pip install -e .
+conda activate tsgm
+python -m pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu101/torch1.8/index.html
 ```
 Please make sure you have up-to-date NVIDIA drivers supporting CUDA 10.1 at least.
 Alternatively use ```pip -r requirements.txt```.

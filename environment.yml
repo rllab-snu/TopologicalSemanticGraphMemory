@@ -1,6 +1,5 @@
 name: tsgm
 channels:
-  - aihabitat
   - conda-forge
   - defaults
 dependencies:
@@ -20,8 +19,6 @@ dependencies:
   - gitpython=3.1.27=pyhd8ed1ab_0
   - gmp=6.2.1=h58526e2_0
   - gnutls=3.6.13=h85f3911_1
-  - habitat-sim-mutex=1.0=headless_bullet
-  - headless=2.0=0
   - imageio=2.21.3=pyhfa7a67d_0
   - imageio-ffmpeg=0.4.7=pyhd8ed1ab_0
   - jbig=2.1=h7f98852_2003
@@ -133,7 +130,6 @@ dependencies:
     - gym==0.21.0
     - gym-notices==0.0.8
     - h5py==3.7.0
-    - habitat-sim==0.2.1
     - hydra-core==1.2.0
     - idna==3.4
     - ifcfg==0.23
