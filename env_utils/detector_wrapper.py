@@ -128,7 +128,7 @@ class Detector(object):
         args = SimpleNamespace(**cfg['ARGS'])
         self.cfg = cfg
         self.args = args
-        detector_cfg = detector_setup_cfg(cfg, args.project_dir, "model/Detector/mask_rcnn_R_50_FPN_3x.yaml", "model/Detector/model_final_f10217.pkl")
+        detector_cfg = detector_setup_cfg(cfg, args.project_dir, "model/Detector/mask_rcnn_R_50_FPN_3x.yaml", "data/detector/model_final_f10217.pkl")
 
         self.metadata = MetadataCatalog.get(
             detector_cfg.DATASETS.TEST[0] if len(detector_cfg.DATASETS.TEST) else "__unused"

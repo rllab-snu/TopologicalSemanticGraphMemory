@@ -217,10 +217,7 @@ class Env:
             self.get_semantic_mapping()
 
         if self._config.USE_DETECTOR:
-            if self.args.fd:
-                cfg_detector = self.detector_setup_cfg("model/Detector/mask_rcnn_R_50_FPN_3x.yaml", f"model/Detector/model_finetune_{self.dn}.pth")
-            else:
-                cfg_detector = self.detector_setup_cfg("model/Detector/mask_rcnn_R_50_FPN_3x.yaml", "model/Detector/model_final_f10217.pkl")
+            cfg_detector = self.detector_setup_cfg("model/Detector/mask_rcnn_R_50_FPN_3x.yaml", "data/detector/model_final_f10217.pkl")
             self.detector = VisualizationDemo(cfg_detector, self._config)
 
         """Objects"""

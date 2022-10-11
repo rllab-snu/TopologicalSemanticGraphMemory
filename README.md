@@ -53,7 +53,8 @@ cd habitat-lab-v21
 git checkout tags/v0.2.1
 pip install -e .
 conda activate tsgm
-python -m pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu101/torch1.8/index.html
+conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cudatoolkit=11.3 -c pytorch -c conda-forge
+python -m pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html
 ```
 
 ### Gibson Env Setup
@@ -71,7 +72,7 @@ habitat-lab
       │               └── train
       │               └── val
       └── scene_datasets
-          └── gibson_habitat
+          └── gibson
               └── *.glb, *.navmeshs  
 ```
 
@@ -128,7 +129,7 @@ Note that the top-down map and pose information are only used for visualization,
 The reinforcement learning code is highly based on [habitat-lab/habitat_baselines](https://github.com/facebookresearch/habitat-lab/tree/master/habitat_baselines).
 To train the agent with reinforcement learning (PPO), run:
     ```
-    python train_rl.py --policy TSGMPolicy --config configs/TSGM.yaml --version exp_name --diff [easy/medium/hard/random] --use-detector --strict-stop --task imggoalnav
+    python train_rl.py --policy TSGMPolicy --config configs/TSGM.yaml --version exp_name --diff hard --use-detector --strict-stop --task imggoalnav
     ```
     This will train the agent with the imitation learning model in *./checkpoints/exp_name*.
     The trained model will be saved in *./checkpoints/exp_name*.
