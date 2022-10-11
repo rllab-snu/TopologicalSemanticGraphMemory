@@ -175,7 +175,6 @@ dependencies:
     - shortuuid==1.0.9
     - simplejson==3.17.6
     - tabulate==0.8.10
-    - tb-nightly==2.11.0a20220914
     - tensorboard==1.13.1
     - tensorboard-data-server==0.6.1
     - tensorboard-plugin-wit==1.8.1
