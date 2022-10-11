@@ -221,10 +221,7 @@ class Env:
             self.detector = VisualizationDemo(cfg_detector, self._config)
 
         """Objects"""
-        self._sim.set_gravity(Vector3(0., -9.8, 0.))
         self.camera_matrix = get_camera_matrix(self.cam_width, self.img_height, 360/self.num_of_camera, 90)
-
-        self.get_render_config()
 
     def set_orthomap(self):
         lower_bound, upper_bound = self._sim.pathfinder.get_bounds()
@@ -706,28 +703,6 @@ class Env:
                         'shortest_paths': None}
         episode = NavigationEpisode(**episode_info)
         return episode, True
-
-    def get_render_config(self):
-        self.render_configs = {}
-        self.dataset = self._sim.habitat_config['SCENE'].split("/")[-2]
-        if self.dataset not in ["gibson_tiny", "gibson", "mp3d"]:
-            self.dataset = self._sim.habitat_config['SCENE'].split("/")[-3]
-        with open(os.path.join(self.project_dir, f"data/floorplans/{self.dataset}_floorplans/render_config.csv")) as csvfile:
-            reader = csv.DictReader(csvfile)
-            for item in reader:
-                if item["level"] == "0":
-                    self.render_configs[item["scanId"]] = {}
-                self.render_configs[item["scanId"]][item["level"]] = [
-                    item["x_low"],
-                    item["y_low"],
-                    item["z_low"],
-                    item["x_high"],
-                    item["y_high"],
-                    item["z_high"],
-                    item["width"],
-                    item["height"],
-                    item["Projection"]
-                ]
 
     def reset(self) -> Observations:
         """Resets the environments and returns the initial observations.
