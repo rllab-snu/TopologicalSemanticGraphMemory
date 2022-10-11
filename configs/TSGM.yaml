@@ -1,0 +1,64 @@
+runner: 'TSGMRunner'
+scene_data: ''
+BASE_TASK_CONFIG_PATH: ""
+IL_TRAINER_NAME: "IL_trainer"
+RL_TRAINER_NAME: "custom_ppo_memory"
+ENV_NAME: "ImageGoalGraphEnv"
+MAP_NAME: "TopDownGraphMap"
+DIFFICULTY: 'hard'
+USE_OBJECT: True
+USE_DETECTOR: True
+TAGS: ["imagegoal"]
+SIMULATOR:
+  TYPE: 'Sim-0'
+
+SIMULATOR_GPU_ID: 0
+TORCH_GPU_ID: 0
+
+NUM_PROCESSES: 4
+NUM_VAL_PROCESSES: 0
+
+SENSORS: ["DEPTH_SENSOR", "RGB_SENSOR", "SEMANTIC_SENSOR"]
+
+OBS_TO_SAVE: ['panoramic_rgb', 'panoramic_depth','goal_embedding', 'episode_info', 'target_goal',
+              'step', 'have_been', 'gt_action', 'progress']
+POLICY: ''
+WRAPPER: "EnvWrapper"
+REWARD_METHOD: 'progress'
+USE_AUXILIARY_INFO: True
+
+TRAIN:
+  ADD_OBJECT: False
+
+TEST:
+  ADD_OBJECT: False
+
+IL:
+  batch_size: 4
+  num_workers: 4
+  LOG_INTERVAL: 20
+  CHECKPOINT_INTERVAL: 5000
+  VIS_INTERVAL: 5000
+  WRAPPER: ILWrapper
+
+OBJECTGRAPH:
+  SPARSE: True
+
+RL:
+  SUCCESS_REWARD: 10.0
+  SUCESS_MEASURE: 'SUCCESS'
+  SLACK_REWARD: -0.001
+  LOG_INTERVAL: 20
+  CHECKPOINT_INTERVAL: 200
+  VIS_INTERVAL: 1000
+  PPO:
+    num_mini_batch: 2
+    num_steps: 64
+    pretrained_weights: "./data/best_ckpts/tsgm_il_v2.pth"
+    rl_pretrained: False
+    il_pretrained: True
+    pretrained_encoder: False
+    train_encoder: True
+    reset_critic: False
+    use_linear_clip_decay: True
+    use_linear_lr_decay: True

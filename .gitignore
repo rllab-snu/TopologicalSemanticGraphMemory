@@ -1,0 +1,8 @@
+/data
+/wandb
+/.idea
+train.log
+*.pyc
+*.pt
+*.pth
+*.pth.tar
