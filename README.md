@@ -55,8 +55,6 @@ pip install -e .
 conda activate tsgm
 python -m pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu101/torch1.8/index.html
 ```
-Please make sure you have up-to-date NVIDIA drivers supporting CUDA 10.1 at least.
-Alternatively use ```pip -r requirements.txt```.
 
 ### Gibson Env Setup
 

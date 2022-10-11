@@ -183,9 +183,9 @@ dependencies:
     - tensorflow-estimator==1.14.0rc0
     - termcolor==2.0.1
     - toml==0.10.2
-    - torch==1.8.1+cu101
+    - torch==1.8.1
     - torchaudio==0.8.1
-    - torchvision==0.9.1+cu101
+    - torchvision==0.9.1
     - typed-ast==1.5.4
     - typer==0.6.1
     - urllib3==1.26.12
@@ -195,4 +195,5 @@ dependencies:
     - wheel==0.37.1
     - yacs==0.1.8
     - zipp==3.8.1
+    - cudatoolkit==10.1
 prefix: /home/blackfoot/anaconda3/envs/tsgm
