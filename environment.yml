@@ -10,6 +10,5 @@ dependencies:
   - numpy=1.21.6
   - matplotlib=3.3.2
   - imageio=2.21.3
-  - imageio-ffmpeg=0.4.7
-  - pip=21.3.1
+  - pip=22.1.2
 prefix: /home/blackfoot/anaconda3/envs/tsgm
