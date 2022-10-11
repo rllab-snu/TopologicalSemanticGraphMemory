@@ -43,7 +43,6 @@ To start, we prefer creating the environment using conda:
 
 ```
 conda env create -f environment.yml
-conda create -n tsgm python=3.7 cmake=3.14.0
 conda activate tsgm
 conda install habitat-sim==0.2.1 withbullet headless -c conda-forge -c aihabitat
 cd 

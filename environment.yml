@@ -85,7 +85,6 @@ dependencies:
   - tqdm=4.64.1=pyhd8ed1ab_0
   - typing-extensions=4.3.0=hd8ed1ab_0
   - typing_extensions=4.3.0=pyha770c72_0
-  - withbullet=2.0=0
   - x264=1!161.3030=h7f98852_1
   - xorg-fixesproto=5.0=h7f98852_1002
   - xorg-inputproto=2.3.2=h7f98852_1002
