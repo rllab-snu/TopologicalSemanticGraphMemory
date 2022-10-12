@@ -73,7 +73,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
         img_encoder = resnet18_img(num_classes=feature_dim)
         dim_mlp = img_encoder.fc.weight.shape[1]
         img_encoder.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), img_encoder.fc)
-        ckpt_pth = os.path.join(self.project_dir, 'data/graph', 'Img_encoder.pth')
+        ckpt_pth = os.path.join(self.project_dir, 'data/graph', 'Img_encoder.pth.tar')
         ckpt = torch.load(ckpt_pth, map_location='cpu')
         img_encoder.load_state_dict(ckpt)
         img_encoder.eval().to(self.torch_device)
