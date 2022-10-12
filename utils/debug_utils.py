@@ -32,3 +32,11 @@ def save_gradcam(filename, gcamA, gcamB, rawA_image, rawB_image, paper_cmap=Fals
     for i in range(len(gcamA)):
         cv2.imwrite(filename + '_{}.png'.format(i), np.uint8(raw_image[i]))
 
+
+def get_remain_time(avg_speed, num_remained):
+    """
+    avg_speed: sec/frame
+    """
+    remain_time = avg_speed * num_remained
+    remain_time_str = "eta: %.0fh %.0fm"%(remain_time // 3600, (remain_time / 60) % 60)
+    return remain_time_str

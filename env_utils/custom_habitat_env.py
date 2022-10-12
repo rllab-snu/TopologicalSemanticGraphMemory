@@ -29,11 +29,11 @@ MIN_DIST = 1.5
 MAX_DIST = 10.0
 from env_utils.custom_habitat_map import get_topdown_map
 from env_utils import *
-from NuriUtils.statics import CATEGORIES, COI_INDEX
+from utils.statics import CATEGORIES, COI_INDEX
 from habitat.core.utils import not_none_validator, try_cv2_import
 import attr
 import gzip
-from NuriUtils.ncutils import append_to_dict
+from utils.ncutils import append_to_dict
 from env_utils.detector_wrapper import VisualizationDemo
 from detectron2.config import get_cfg
 SURFNORM_KERNEL = None
@@ -50,7 +50,7 @@ from habitat.tasks.nav.nav import (
 from types import SimpleNamespace
 TIME_DEBUG = False
 from torchvision.ops import roi_align
-from NuriUtils.ncutils import cam_to_world, get_point_cloud_from_z_panoramic, get_camera_matrix
+from utils.ncutils import cam_to_world, get_point_cloud_from_z_panoramic, get_camera_matrix
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 

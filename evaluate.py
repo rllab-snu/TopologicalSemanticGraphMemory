@@ -6,7 +6,7 @@ from copy import deepcopy
 import datetime
 import torch
 from env_utils.make_env_utils import add_panoramic_camera
-from NuriUtils.utils import get_remain_time
+from utils.debug_utils import get_remain_time
 import habitat
 from habitat import make_dataset
 from env_utils import *
@@ -34,8 +34,7 @@ parser.add_argument('--record-dir', type=str, default='data/video_dir')
 parser.add_argument('--render', action='store_true', default=False)
 parser.add_argument('--use-detector', action='store_true', default=False)
 parser.add_argument('--num-object', default=10, type=int)
-parser.add_argument('--detector-th', default=0.01, type=float)
-parser.add_argument('--multi-target', action='store_true', default=False)
+parser.add_argument('--detector-th', default=0.1, type=float)
 parser.add_argument('--wandb', action='store_true', default=False)
 parser.add_argument('--mode', default='eval', type=str)
 parser.add_argument('--episode_name', default='VGM', type=str) #[VGM, NRNS_curved, NRNS_straight]

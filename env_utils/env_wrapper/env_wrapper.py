@@ -4,10 +4,10 @@ except:
      from gym.wrappers.record_video import RecordVideo as Wrapper
 import torch
 import numpy as np
-from NuriUtils.debug_utils import log_time
+from utils.debug_utils import log_time
 
 TIME_DEBUG = False
-from NuriUtils.habitat_utils import batch_obs
+from utils.habitat_utils import batch_obs
 
 # this wrapper comes after vectorenv
 from habitat.core.vector_env import VectorEnv

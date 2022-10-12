@@ -10,7 +10,7 @@ from torch.autograd import Variable
 import numpy as np
 from PIL import Image
 import torchvision.transforms as transforms
-from NuriUtils.augmentations import GaussianBlur
+from utils.augmentations import GaussianBlur
 from .perception import CategoryEncoding
 
 

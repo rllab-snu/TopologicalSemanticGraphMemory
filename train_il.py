@@ -10,7 +10,7 @@ from dataset.habitatdataset import ILDataset
 from habitat.core.logging import logger
 from torch.utils.data import DataLoader
 import datetime
-from NuriUtils.augmentations import GaussianBlur
+from utils.augmentations import GaussianBlur
 project_dir = os.path.dirname(os.path.abspath(__file__))
 torch.backends.cudnn.enabled = True
 

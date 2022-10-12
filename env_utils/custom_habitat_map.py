@@ -29,7 +29,7 @@ from habitat.utils.geometry_utils import (
 )
 from matplotlib import colors
 import csv
-from NuriUtils.statics import STANDARD_COLORS, CATEGORIES, DETECTION_CATEGORIES, ALL_CATEGORIES, \
+from utils.statics import STANDARD_COLORS, CATEGORIES, DETECTION_CATEGORIES, ALL_CATEGORIES, \
     AGENT_SPRITE, OBJECT_YELLOW, OBJECT_YELLOW_DIM, OBJECT_BLUE, OBJECT_GRAY, OBJECT_GREEN, OBJECT_PINK, OBJECT_RED, OBJECT_START_FLAG, OBJECT_GOAL_FLAG
 cv2 = try_cv2_import()
 

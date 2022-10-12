@@ -3,7 +3,7 @@ import torch.optim as optim
 import os, joblib
 from trainer.il.il_wrapper import *
 TIME_DEBUG = False
-from NuriUtils.debug_utils import log_time
+from utils.debug_utils import log_time
 from torch.autograd import Variable
 import torch.nn as nn
 

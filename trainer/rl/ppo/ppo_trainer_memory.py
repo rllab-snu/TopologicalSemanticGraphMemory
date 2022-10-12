@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import LambdaLR
-from NuriUtils.myLRScheduler import GradualWarmupScheduler
+from utils.LRScheduler import GradualWarmupScheduler
 from types import SimpleNamespace
 
 from habitat import Config, logger

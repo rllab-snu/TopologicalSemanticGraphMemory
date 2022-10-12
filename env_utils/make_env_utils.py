@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from NuriUtils.statics import GIBSON_TINY_TRAIN_SCENE, GIBSON_TINY_TEST_SCENE
+from utils.statics import GIBSON_TINY_TRAIN_SCENE, GIBSON_TINY_TEST_SCENE
 import random
 from typing import Type, Union
 

@@ -13,10 +13,10 @@ import imageio
 from scipy.ndimage.interpolation import rotate
 import cv2
 import csv
-from NuriUtils.statics import STANDARD_COLORS, CATEGORIES, DETECTION_CATEGORIES, ALL_CATEGORIES
+from utils.statics import STANDARD_COLORS, CATEGORIES, DETECTION_CATEGORIES, ALL_CATEGORIES
 import matplotlib.patches as mpatches
 import glob
-from NuriUtils.vis_utils import colors_rgb
+from utils.vis_utils import colors_rgb
 
 parser = argparse.ArgumentParser()
 parser.add_argument(

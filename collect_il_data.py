@@ -13,7 +13,7 @@ from configs.default import get_config
 from tqdm import tqdm
 from habitat import make_dataset
 from env_utils.make_env_utils import add_panoramic_camera
-from NuriUtils.statics import GIBSON_TINY_TRAIN_SCENE, GIBSON_TINY_TEST_SCENE
+from utils.statics import GIBSON_TINY_TRAIN_SCENE, GIBSON_TINY_TEST_SCENE
 
 
 os.environ['GLOG_minloglevel'] = "2"

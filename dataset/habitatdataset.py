@@ -6,13 +6,12 @@ import quaternion as q
 import torchvision.transforms as transforms
 from PIL import Image
 from torchvision.ops import nms as torch_nms
-from NuriUtils.statics import OBJECT_TARGET_CATEGORY, COCO_CATEGORIES, CATEGORIES
 import cv2
 from habitat.utils.geometry_utils import (
     quaternion_from_coeff,
     quaternion_rotate_vector,
 )
-from NuriUtils.debug_utils import log_time
+from utils.debug_utils import log_time
 from os import path as osp
 
 

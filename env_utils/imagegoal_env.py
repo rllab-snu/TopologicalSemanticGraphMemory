@@ -1,7 +1,7 @@
 from typing import Optional, Type
 from habitat import Config, Dataset
 import cv2
-from NuriUtils.vis_utils import observations_to_image, append_text_to_image
+from utils.vis_utils import observations_to_image, append_text_to_image
 from gym.spaces.dict import Dict as SpaceDict
 from gym.spaces.box import Box
 import gzip
@@ -19,8 +19,8 @@ from habitat.tasks.utils import cartesian_to_polar
 import torch
 import json
 from types import SimpleNamespace
-from NuriUtils.statics import CATEGORIES, COI_INDEX
-from NuriUtils.ncutils import cam_to_world, get_point_cloud_from_z_panoramic, get_camera_matrix
+from utils.statics import CATEGORIES, COI_INDEX
+from utils.ncutils import cam_to_world, get_point_cloud_from_z_panoramic, get_camera_matrix
 from torchvision.ops import roi_align
 from env_utils.noisy_actions import CustomActionSpaceConfiguration
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -696,7 +696,7 @@ class ImageGoalEnv(RLEnv):
         info = self.get_info(None) if self.info is None else self.info
         img = observations_to_image(self.obs.copy(), info, mode='panoramic', clip = self.config.WRAPPER == "GraphWrapper", use_detector=self.config.USE_DETECTOR,
                                     task_name=self.config.TASK_CONFIG.TASK.TASK_NAME, dataset_name=self.config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0],
-                                    multi_target=self.config.TASK_CONFIG['ARGS']['multi_target'], attns=attns, sim=self._env._sim)
+                                     attns=attns, sim=self._env._sim)
         str_action = 'XX'
         if 'STOP' not in self.habitat_env.task.actions:
             action_list = ["MF", 'TL', 'TR']

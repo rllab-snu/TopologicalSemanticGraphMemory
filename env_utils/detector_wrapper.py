@@ -9,7 +9,6 @@ from detectron2.structures.boxes import Boxes
 from detectron2.config import get_cfg
 import os
 from types import SimpleNamespace
-from NuriUtils.ncutils import append_to_dict
 from model.Detector.detect_utils import MyRCNN, MyROIHeads
 
 
