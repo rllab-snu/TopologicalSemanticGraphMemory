@@ -248,7 +248,8 @@ class PPOTrainer(BaseRLTrainer):
         """
         return torch.load(checkpoint_path, *args, **kwargs)
 
-    METRICS_BLACKLIST = {"top_down_map", "collisions.is_collision", 'episode', 'step', 'goal_index.num_goals', 'goal_index.curr_goal_index', 'gt_pose'}
+    METRICS_BLACKLIST = {"top_down_map", "collisions.is_collision", 'episode', 'step', 'goal_index.num_goals', 'goal_index.curr_goal_index', 'gt_pose',
+                         'ortho_map','ortho_map.agent_loc','ortho_map.agent_rot'}
 
     @classmethod
     def _extract_scalars_from_info(

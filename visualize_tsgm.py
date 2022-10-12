@@ -62,10 +62,10 @@ os.makedirs(args.data_dir, exist_ok=True)
 os.makedirs(os.path.join(args.data_dir, "output"), exist_ok=True)
 os.makedirs(os.path.join(args.data_dir, "temp"), exist_ok=True)
 
-GOAL_FLAG = imageio.imread("./utils/assets/maps_topdown_flag/flag2_red.png")
-IMG_NODE_FLAG = imageio.imread("./utils/assets/maps_topdown_node/circle.png")
-OBJ_NODE_FLAG = imageio.imread("./utils/assets/maps_topdown_node/yellow_circle.png")
-JACKAL_SPRITE = imageio.imread("./utils/assets/maps_topdown_agent_sprite/jackal.png")
+GOAL_FLAG = imageio.imread(os.path.join(project_dir, "utils/assets/maps_topdown_flag/flag2_red.png"))
+IMG_NODE_FLAG = imageio.imread(os.path.join(project_dir, "utils/assets/maps_topdown_node/flag2_red.png"))
+OBJ_NODE_FLAG = imageio.imread(os.path.join(project_dir, "utils/assets/maps_topdown_node/yellow_circle.png"))
+JACKAL_SPRITE = imageio.imread(os.path.join(project_dir, "utils/assets/maps_topdown_agent_sprite/jackal.png"))
 JACKAL_SPRITE = np.ascontiguousarray(np.flipud(JACKAL_SPRITE))
 initial_jackal_size = JACKAL_SPRITE.shape[0]
 obj_thresh = 0.7
@@ -88,6 +88,7 @@ else:
         except:
             pass
 render_configs = joblib.load(os.path.join("./data/floorplans", f"{args.dataset}_floorplans/render_config.pkl"))
+
 
 def draw_graph(node_image, i, vis_data, vis_features, attn_method="curr", draw_im_graph=True, draw_obj_graph=True, use_detector=False, font_size=2, font_thickness=2,
                im_node_size=10, obj_node_size=10, im_edge_size=3, obj_edge_size=1, rotated=False):
@@ -374,7 +375,7 @@ for file_idx in tqdm(file_indices):
     fog_of_war_mask = (ortho_mask.astype(np.int32)).copy()[..., None]
     for i in tqdm(np.arange(len(vis_data['map']))):
         map_image = ortho_map.copy()
-        map_image[ortho_depth] = 255
+        map_image[ortho_mask] = 255
         gray_image = cv2.cvtColor(map_image, cv2.COLOR_BGR2GRAY)
         gray_image = gray_image[..., None]
         agent_rotation = vis_data['map'][i]['agent_angle']
