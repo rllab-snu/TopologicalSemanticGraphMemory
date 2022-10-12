@@ -234,13 +234,13 @@ class ImageGoalEnv(RLEnv):
         self.curr_graph_path = None
         self.need_subgoal_obs = getattr(config, 'subgoal_obs', False)
 
-        self.use_noise_position = getattr(config, 'noise_position', False)
-        if self.use_noise_position:
-            self.sensor_noise_fwd = pickle.load(open(os.path.join(project_dir, "data/noise_models/sensor_noise_fwd.pkl", 'rb')))
-            self.sensor_noise_left = pickle.load(open(os.path.join(project_dir, "data/noise_models/sensor_noise_left.pkl", 'rb')))
-            self.sensor_noise_right = pickle.load(open(os.path.join(project_dir, "data/noise_models/sensor_noise_right.pkl", 'rb')))
-            self.sensor_noise_level = getattr(self.config, 'sensor_noise_level', 1.0)
-            print('[ImageGoalEnv] Sensor noise level', self.sensor_noise_level)
+        # self.use_noise_position = getattr(config, 'noise_position', False)
+        # if self.use_noise_position:
+        #     self.sensor_noise_fwd = pickle.load(open(os.path.join(project_dir, "data/noise_models/sensor_noise_fwd.pkl", 'rb')))
+        #     self.sensor_noise_left = pickle.load(open(os.path.join(project_dir, "data/noise_models/sensor_noise_left.pkl", 'rb')))
+        #     self.sensor_noise_right = pickle.load(open(os.path.join(project_dir, "data/noise_models/sensor_noise_right.pkl", 'rb')))
+        #     self.sensor_noise_level = getattr(self.config, 'sensor_noise_level', 1.0)
+        #     print('[ImageGoalEnv] Sensor noise level', self.sensor_noise_level)
 
         self.build_path_follower()
         self.num_of_camera = task_config.SIMULATOR.PANORAMIC_SENSOR.NUM_CAMERA
@@ -252,56 +252,8 @@ class ImageGoalEnv(RLEnv):
         half = self.num_of_camera // 2
         self.angles = angles[half:] + angles[:half]
 
-        use_orthomap = True if "ORTHO_RGB_SENSOR" in task_config.SIMULATOR.AGENT_0.SENSORS else False
-        if use_orthomap:
-            self.set_orthomap()
-            scene_bounds = self._env.sim.pathfinder.get_bounds()
-            state = self._env.sim.get_observations_at([(scene_bounds[0][0] + scene_bounds[1][0]) / 2., self.current_position[1] + 1., (scene_bounds[0][2] + scene_bounds[1][2]) / 2.],
-                                                  q.from_rotation_vector([-np.pi / 2, 0., 0.]))
-            self.ortho_rgb = state['ortho_rgb_sensor']
-
         if self.config.USE_DETECTOR:
             self.detector = self.habitat_env.detector
-
-    def set_orthomap(self):
-        lower_bound, upper_bound = self._env.sim.pathfinder.get_bounds()
-        map_resolution = self.config.TASK_CONFIG.SIMULATOR.ORTHO_RGB_SENSOR.WIDTH
-        meters_per_pixel = min(
-            abs(upper_bound[coord] - lower_bound[coord]) / map_resolution
-            for coord in [0, 2]
-        )
-        frame_width = int((upper_bound[0] - lower_bound[0]) // meters_per_pixel)
-        frame_height = int((upper_bound[2] - lower_bound[2]) // meters_per_pixel)
-        if frame_width > frame_height:
-            ratio = float(frame_height / frame_width)
-            frame_width = map_resolution
-            frame_height = int(map_resolution * ratio)
-        ortho_rgba_sensor = self._env.sim.agents[0]._sensors['ortho_rgb_sensor']
-        P = ortho_rgba_sensor.render_camera.projection_matrix
-        A = [lower_bound[0] - (upper_bound[0] + lower_bound[0]) / 2, lower_bound[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
-        grid_x_low, grid_y_low = np.array([frame_width / 2, frame_height / 2]) * np.matmul(P, A)[:2] + np.array([frame_width / 2, frame_height / 2])
-        A = [upper_bound[0] - (upper_bound[0] + lower_bound[0]) / 2, upper_bound[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
-        grid_x_high, grid_y_high = np.array([frame_width / 2, frame_height / 2]) * np.matmul(P, A)[:2] + np.array([frame_width / 2, frame_height / 2])
-
-        zoom_param = min((grid_x_high - grid_x_low) / frame_width, (grid_y_high - grid_y_low) / frame_height)
-        if zoom_param > 1:
-            zoom_param = 1 / max((grid_x_high - grid_x_low) / frame_width, (grid_y_high - grid_y_low) / frame_height)
-        ortho_rgba_sensor = self._env.sim.agents[0]._sensors['ortho_rgb_sensor']
-        ortho_rgba_sensor.zoom(zoom_param)
-        if 'ortho_semantic_sensor' in self._env.sim.agents[0]._sensors:
-            ortho_semantic_sensor = self._env.sim.agents[0]._sensors['ortho_semantic_sensor']
-            ortho_semantic_sensor.zoom(zoom_param)
-        if 'ortho_depth_sensor' in self._env.sim.agents[0]._sensors:
-            ortho_depth_sensor = self._env.sim.agents[0]._sensors['ortho_depth_sensor']
-            ortho_depth_sensor.zoom(zoom_param)
-        self.P = P = ortho_rgba_sensor.render_camera.projection_matrix
-        A = [lower_bound[0] - (upper_bound[0] + lower_bound[0]) / 2, lower_bound[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
-        grid_x_low, grid_y_low = np.array([frame_width / 2, frame_height / 2]) * np.matmul(P, A)[:2] + np.array([frame_width / 2, frame_height / 2])
-        A = [upper_bound[0] - (upper_bound[0] + lower_bound[0]) / 2, upper_bound[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
-        grid_x_high, grid_y_high = np.array([frame_width / 2, frame_height / 2]) * np.matmul(P, A)[:2] + np.array([frame_width / 2, frame_height / 2])
-        self.ortho_width = frame_width
-        self.ortho_height = frame_height
-        self.ortho_boundary = [grid_x_low, grid_y_low, grid_x_high, grid_y_high]
 
     @property
     def current_position(self):
@@ -321,10 +273,6 @@ class ImageGoalEnv(RLEnv):
     def draw_image_graph_on_map(self, node_list, affinity, graph_mask, curr_info, flags=None):
         if self.mapper is not None and self.render_map:
             self.mapper.draw_image_graph_on_map(node_list, affinity, graph_mask, curr_info, flags)
-
-    # def draw_object_graph_on_map(self, node_list, node_category, affinity, graph_mask, curr_info, flags=None):
-    #     if self.mapper is not None and self.render_map:
-    #         self.mapper.draw_object_graph_on_map(node_list, node_category, affinity, graph_mask, curr_info, flags)
 
     def draw_object_graph_on_map(self, node_list, node_category, node_score, vis_node_list, affinity, graph_mask, curr_info, flags=None):
         if self.mapper is not None and self.render_map:
@@ -354,8 +302,8 @@ class ImageGoalEnv(RLEnv):
     def get_dist(self, goal_position):
         return self.habitat_env._sim.geodesic_distance(self.current_position, goal_position)
 
-    def get_noisy_dist(self, goal_position):
-        return self.habitat_env._sim.geodesic_distance(self.noise_position, goal_position)
+    # def get_noisy_dist(self, goal_position):
+    #     return self.habitat_env._sim.geodesic_distance(self.noise_position, goal_position)
 
     @property
     def recording_now(self):
@@ -383,8 +331,8 @@ class ImageGoalEnv(RLEnv):
         self._previous_measure = self.get_dist(self.curr_goal.position)
         self.initial_pose = self.current_position
         self.start_to_goal = self.habitat_env._sim.geodesic_distance(self.initial_pose, self.curr_goal.position)
-        if self.use_noise_position:
-            self.noise_position = [self.initial_pose[0], self.initial_pose[2], q.as_euler_angles(self.current_rotation)[1]]
+        # if self.use_noise_position:
+        #     self.noise_position = [self.initial_pose[0], self.initial_pose[2], q.as_euler_angles(self.current_rotation)[1]]
 
         self.info = {}
         self.total_reward = 0
@@ -431,17 +379,17 @@ class ImageGoalEnv(RLEnv):
 
     def step(self, action):
         self._previous_action = action
-        prev_position = self.get_sim_location()
+        # prev_position = self.get_sim_location()
         obs, reward, done, self.info = super().step(self.action_dict[action])
-        prev_pose = self.convert_sim_to_ans(self.prev_position, q.as_euler_angles(self.prev_rotation)[1])  # [ax, ay, radi]
-        curr_pose = self.convert_sim_to_ans(self.current_position, q.as_euler_angles(self.current_rotation)[1])  # [ax, ay, radi]
-        if self.use_noise_position:
-            dx, dy, do = self.get_noisy_pose_change(action, curr_pose, prev_pose) # [ax, ay, radi]
-            xx, yy, oo = self.convert_sim_to_ans([self.noise_position[0],self.initial_pose[1], self.noise_position[1]],self.noise_position[2]) # [ax, ay, radi]
-            x, y, o = pu.get_new_pose([xx,yy, np.rad2deg(oo)], (dx,dy,do))
-            self.noise_position = self.convert_ans_to_sim([x,y,o])
-        else:
-            dx, dy, do = self.get_pose_change(curr_pose, prev_pose)
+        # prev_pose = self.convert_sim_to_ans(self.prev_position, q.as_euler_angles(self.prev_rotation)[1])  # [ax, ay, radi]
+        # curr_pose = self.convert_sim_to_ans(self.current_position, q.as_euler_angles(self.current_rotation)[1])  # [ax, ay, radi]
+        # if self.use_noise_position:
+        #     dx, dy, do = self.get_noisy_pose_change(action, curr_pose, prev_pose) # [ax, ay, radi]
+        #     xx, yy, oo = self.convert_sim_to_ans([self.noise_position[0],self.initial_pose[1], self.noise_position[1]],self.noise_position[2]) # [ax, ay, radi]
+        #     x, y, o = pu.get_new_pose([xx,yy, np.rad2deg(oo)], (dx,dy,do))
+        #     self.noise_position = self.convert_ans_to_sim([x,y,o])
+        # else:
+        #     dx, dy, do = self.get_pose_change(curr_pose, prev_pose)
 
         self.timestep += 1
         self.info['length'] = self.timestep * done

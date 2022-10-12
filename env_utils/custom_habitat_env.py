@@ -192,10 +192,9 @@ class Env:
         except:
             self.episode_name = "VGM"
 
-        self.run_mode = 'RL'
-        self._episode_source = 'sample'
+        # self.run_mode = 'RL'
+        # self._episode_source = 'sample'
         self._num_goals = getattr(self._config.ENVIRONMENT, 'NUM_GOALS', 1)
-        # self._agent_task = 'search'
         self._episode_iterator = {}
         self._episode_datasets = {}
         self._current_scene_iter = 0
@@ -220,48 +219,8 @@ class Env:
             cfg_detector = self.detector_setup_cfg("model/Detector/mask_rcnn_R_50_FPN_3x.yaml", "data/detector/model_final_f10217.pkl")
             self.detector = VisualizationDemo(cfg_detector, self._config)
 
-        """Objects"""
+        """CAMERA TO WORLD MAPPING"""
         self.camera_matrix = get_camera_matrix(self.cam_width, self.img_height, 360/self.num_of_camera, 90)
-
-    def set_orthomap(self):
-        lower_bound, upper_bound = self._sim.pathfinder.get_bounds()
-        map_resolution = self._config.SIMULATOR.ORTHO_RGB_SENSOR.WIDTH
-        meters_per_pixel = min(
-            abs(upper_bound[coord] - lower_bound[coord]) / map_resolution
-            for coord in [0, 2]
-        )
-        frame_width = int((upper_bound[0] - lower_bound[0]) // meters_per_pixel)
-        frame_height = int((upper_bound[2] - lower_bound[2]) // meters_per_pixel)
-        if frame_width > frame_height:
-            ratio = float(frame_height / frame_width)
-            frame_width = map_resolution
-            frame_height = int(map_resolution * ratio)
-        ortho_rgba_sensor = self._sim.agents[0]._sensors['ortho_rgb_sensor']
-        P = ortho_rgba_sensor.render_camera.projection_matrix
-        A = [lower_bound[0] - (upper_bound[0] + lower_bound[0]) / 2, lower_bound[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
-        grid_x_low, grid_y_low = np.array([frame_width / 2, frame_height / 2]) * np.matmul(P, A)[:2] + np.array([frame_width / 2, frame_height / 2])
-        A = [upper_bound[0] - (upper_bound[0] + lower_bound[0]) / 2, upper_bound[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
-        grid_x_high, grid_y_high = np.array([frame_width / 2, frame_height / 2]) * np.matmul(P, A)[:2] + np.array([frame_width / 2, frame_height / 2])
-
-        zoom_param = min((grid_x_high - grid_x_low) / frame_width, (grid_y_high - grid_y_low) / frame_height)
-        if zoom_param > 1:
-            zoom_param = 1 / max((grid_x_high - grid_x_low) / frame_width, (grid_y_high - grid_y_low) / frame_height)
-        ortho_rgba_sensor = self._sim.agents[0]._sensors['ortho_rgb_sensor']
-        ortho_rgba_sensor.zoom(zoom_param)
-        if 'ortho_semantic_sensor' in self._sim.agents[0]._sensors:
-            ortho_semantic_sensor = self._sim.agents[0]._sensors['ortho_semantic_sensor']
-            ortho_semantic_sensor.zoom(zoom_param)
-        if 'ortho_depth_sensor' in self._sim.agents[0]._sensors:
-            ortho_depth_sensor = self._sim.agents[0]._sensors['ortho_depth_sensor']
-            ortho_depth_sensor.zoom(zoom_param)
-        self.P = P = ortho_rgba_sensor.render_camera.projection_matrix
-        A = [lower_bound[0] - (upper_bound[0] + lower_bound[0]) / 2, lower_bound[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
-        grid_x_low, grid_y_low = np.array([frame_width / 2, frame_height / 2]) * np.matmul(P, A)[:2] + np.array([frame_width / 2, frame_height / 2])
-        A = [upper_bound[0] - (upper_bound[0] + lower_bound[0]) / 2, upper_bound[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
-        grid_x_high, grid_y_high = np.array([frame_width / 2, frame_height / 2]) * np.matmul(P, A)[:2] + np.array([frame_width / 2, frame_height / 2])
-        self.ortho_width = frame_width
-        self.ortho_height = frame_height
-        self.ortho_boundary = [grid_x_low, grid_y_low, grid_x_high, grid_y_high]
 
     @property
     def current_position(self):
@@ -272,14 +231,13 @@ class Env:
         return self.sim.get_agent_state().rotation
 
     def detector_setup_cfg(self, yaml_dir, pkl_dir):
-        # load config from file and command-line arguments
         cfg = get_cfg()
         cfg.merge_from_file(os.path.join(self.project_dir, yaml_dir))
         cfg.merge_from_list(["MODEL.WEIGHTS", os.path.join(self.project_dir, pkl_dir), "INPUT.FORMAT", "RGB"])
-        # Set score_threshold for builtin modelsdetector
         cfg.MODEL.RETINANET.SCORE_THRESH_TEST = self._config.detector_th
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = self._config.detector_th
         cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = self._config.detector_th
+        cfg.MODEL.DEVICE = self._config.SIMULATOR_GPU_ID
         cfg.freeze()
         return cfg
 
@@ -438,9 +396,6 @@ class Env:
     def get_target_objects(self, goal_position, goal_rotation):
         goal_state = self._sim.get_observations_at(goal_position, goal_rotation, keep_agent_at_new_pose=True)
         if self._config.USE_DETECTOR:
-            # if self._config.VERSION == "collect":
-            #     object_bbox, object_score, object_category = self.detector.run_on_panoramic_image(goal_state['panoramic_rgb'][:, :, :3])
-            # else:
             object_bbox, object_score, object_category, object_seg = self.detector.run_on_image(goal_state['panoramic_rgb'][:, :, :3])
             object_world_pose = np.empty([0, 3])
             if len(object_bbox) > 0:
@@ -702,8 +657,6 @@ class Env:
                                                             '{}/{}/{}.glb'.format(self._config.DATASET.DATASET_NAME, scene_name, scene_name))
             self._config.freeze()
             self.reconfigure(self._config)
-            self.set_orthomap()
-            self.get_render_config()
 
             print('[Proc %d] swapping building %s, every episode will be sampled in : %f, %f' % (self._config.PROC_ID, scene_name, self.MIN_DIST, self.MAX_DIST))
 
@@ -747,10 +700,6 @@ class Env:
                         episodes = []
                     self._swap_building_every = int(np.ceil(self.args.num_episodes / len(self._scenes)))
                 self._episode_datasets.update({scene_name: episodes})
-                scene_bounds = self._sim.pathfinder.get_bounds() #self.bounds[scene_name]
-                state = self._sim.get_observations_at([(scene_bounds[0][0] + scene_bounds[1][0]) / 2., self.current_position[1] + 1., (scene_bounds[0][2] + scene_bounds[1][2]) / 2.],
-                                                      q.from_rotation_vector([-np.pi / 2, 0., 0.]))
-                self.ortho_rgb = state['ortho_rgb_sensor']
 
         self.scene_name = scene_name
 

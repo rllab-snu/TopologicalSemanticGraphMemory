@@ -12,11 +12,10 @@ from types import SimpleNamespace
 from NuriUtils.ncutils import append_to_dict
 from model.Detector.detect_utils import MyRCNN, MyROIHeads
 
+
 class MyPredictor(DefaultPredictor):
     def __init__(self, cfg):
         super().__init__(cfg)
-        # self.model = self.model.cpu()
-        # super(DefaultPredictor, self).__init__()
 
     def __call__(self, original_image, objects=None):
         """
