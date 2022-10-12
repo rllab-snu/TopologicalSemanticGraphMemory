@@ -280,7 +280,6 @@ class ImageGoalGraphEnv(ImageGoalEnv):
         return obs
 
     def reset(self):
-        print("aa")
         if self.args.record > 0:
             self.record_pose_action = []
             self.record_graphs = []
@@ -288,7 +287,6 @@ class ImageGoalGraphEnv(ImageGoalEnv):
             self.record_objects = []
             self.record_imgs = []
             self.record_iter += 1
-        print("aa")
         obs_list = super().reset()
         print("bb")
         obs = self.build_graph(obs_list, reset=True)
