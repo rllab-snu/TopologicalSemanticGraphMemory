@@ -5,7 +5,7 @@ import gzip
 from copy import deepcopy
 import datetime
 import torch
-from env_utils.make_env_utils import add_panoramic_camera, add_orthographic_camera, add_equirect_camera
+from env_utils.make_env_utils import add_panoramic_camera
 from NuriUtils.utils import get_remain_time
 import habitat
 from habitat import make_dataset
@@ -86,8 +86,6 @@ def eval_config(args):
     habitat_api_path = os.path.join(os.path.dirname(habitat.__file__), '../')
     print(args.config)
     config.TASK_CONFIG = add_panoramic_camera(config.TASK_CONFIG, normalize_depth=True)
-    config.TASK_CONFIG = add_orthographic_camera(config.TASK_CONFIG)
-    config.TASK_CONFIG = add_equirect_camera(config.TASK_CONFIG)
     config.TASK_CONFIG.DATASET.SPLIT = args.split #if 'gibson' in config.TASK_CONFIG.DATASET.DATA_PATH else 'val'
     config.TASK_CONFIG.DATASET.SCENES_DIR = os.path.join(habitat_api_path, config.TASK_CONFIG.DATASET.SCENES_DIR)
     config.TASK_CONFIG.DATASET.DATA_PATH = os.path.join(habitat_api_path, config.TASK_CONFIG.DATASET.DATA_PATH)
