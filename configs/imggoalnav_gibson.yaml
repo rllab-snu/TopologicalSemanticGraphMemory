@@ -7,7 +7,7 @@ USE_DETECTOR: True
 detector_th: 0.01
 graph_th: 0.75
 object_th: 0.7
-IMG_SHAPE: (64, 256)
+IMG_SHAPE: (64, 252)
 NUM_CAMERA: 12
 CAMERA_HEIGHT: 0.88
 IL_TRAINER: "ImgGoalTrainer"
