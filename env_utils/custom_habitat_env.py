@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 # Habitat environment without Dataset
-import math
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
 
 import habitat_sim
@@ -13,11 +12,7 @@ import gym
 import numpy as np
 from gym.spaces.dict import Dict as SpaceDict
 from gym.spaces.discrete import Discrete
-from habitat.utils.visualizations import fog_of_war, maps
-from habitat_sim._ext.habitat_sim_bindings import MotionType
-import magnum as mn
 import torch
-from habitat_sim.utils import viz_utils as vut
 from habitat.config import Config
 from habitat.core.dataset import Dataset, Episode, EpisodeIterator
 from habitat.core.embodied_task import EmbodiedTask, Metrics
@@ -29,32 +24,24 @@ import os
 from habitat_sim.utils.common import quat_to_coeffs
 import quaternion as q
 import time
-from magnum import Quaternion, Vector3, Rad
-import joblib
-import csv
 import json
-import random
-import matplotlib.pyplot as plt
 MIN_DIST = 1.5
 MAX_DIST = 10.0
 from env_utils.custom_habitat_map import get_topdown_map
 from env_utils import *
-from NuriUtils.statics import OBJECT_TARGET_CATEGORY, CATEGORIES, COI_INDEX
+from NuriUtils.statics import CATEGORIES, COI_INDEX
 from habitat.core.utils import not_none_validator, try_cv2_import
 import attr
 import gzip
 from NuriUtils.ncutils import append_to_dict
-import skimage
 from env_utils.detector_wrapper import VisualizationDemo
 from detectron2.config import get_cfg
 SURFNORM_KERNEL = None
-from argparse import Namespace
 from habitat.tasks.utils import cartesian_to_polar, quaternion_to_rotation
 from habitat.utils.geometry_utils import (
     quaternion_from_coeff,
     quaternion_rotate_vector,
 )
-import quaternion
 from habitat.tasks.nav.nav import (
     NavigationEpisode,
     NavigationGoal,
@@ -64,6 +51,7 @@ from types import SimpleNamespace
 TIME_DEBUG = False
 from torchvision.ops import roi_align
 from NuriUtils.ncutils import cam_to_world, get_point_cloud_from_z_panoramic, get_camera_matrix
+project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 @attr.s(auto_attribs=True, kw_only=True)
@@ -183,17 +171,12 @@ class Env:
         self.MIN_DIST = MIN_DIST
         self.difficulty = "random"
         self.args = SimpleNamespace(**config['ARGS'])
-        try:
-            self.project_dir = self.args.project_dir
-        except:
-            self.project_dir = '.'
+        self.episode_name = "VGM"
         try:
             self.episode_name = self.args.episode_name
         except:
-            self.episode_name = "VGM"
+            pass
 
-        # self.run_mode = 'RL'
-        # self._episode_source = 'sample'
         self._num_goals = getattr(self._config.ENVIRONMENT, 'NUM_GOALS', 1)
         self._episode_iterator = {}
         self._episode_datasets = {}
@@ -232,8 +215,8 @@ class Env:
 
     def detector_setup_cfg(self, yaml_dir, pkl_dir):
         cfg = get_cfg()
-        cfg.merge_from_file(os.path.join(self.project_dir, yaml_dir))
-        cfg.merge_from_list(["MODEL.WEIGHTS", os.path.join(self.project_dir, pkl_dir), "INPUT.FORMAT", "RGB"])
+        cfg.merge_from_file(os.path.join(project_dir, yaml_dir))
+        cfg.merge_from_list(["MODEL.WEIGHTS", os.path.join(project_dir, pkl_dir), "INPUT.FORMAT", "RGB"])
         cfg.MODEL.RETINANET.SCORE_THRESH_TEST = self._config.detector_th
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = self._config.detector_th
         cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = self._config.detector_th
@@ -595,7 +578,7 @@ class Env:
                 done = False
                 while not done:
                     episode, done = self.generate_next_episode(scene_name)
-                json_file = os.path.join(self.project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.episode_name,
+                json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.episode_name,
                                                                                               self._config.DATASET.DATASET_NAME.split("_")[0],
                                                                                               scene_name))
                 if os.path.exists(json_file):
@@ -662,7 +645,7 @@ class Env:
 
             if self._config['ARGS']['mode'] == "eval":
                 if self._config['ARGS']['episode_name'].split("_")[0] == "VGM":
-                    json_file = os.path.join(self.project_dir, 'data/episodes/{}/{}/{}_{}.json'.format(self.episode_name,
+                    json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}_{}.json'.format(self.episode_name,
                                                                                                   self._config.DATASET.DATASET_NAME.split("_")[0],
                                                                                                   scene_name,
                                                                                                   self.difficulty))
@@ -670,7 +653,7 @@ class Env:
                         episodes = json.load(f)
                     self._swap_building_every = len(episodes)
                 elif self._config['ARGS']['episode_name'].split("_")[0] == "NRNS":
-                    json_file = os.path.join(self.project_dir, 'data/episodes/{}/{}/{}/test_{}.json.gz'.format(self.episode_name.split("_")[0],
+                    json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}/test_{}.json.gz'.format(self.episode_name.split("_")[0],
                                                                                                           self._config.DATASET.DATASET_NAME.split("_")[0],
                                                                                                           self.episode_name.split("_")[1], self.difficulty))
 
@@ -679,7 +662,7 @@ class Env:
                     episodes = [episode for episode in episodes if scene_name in episode['scene_id']]
                     self._swap_building_every = len(episodes)
                 elif self._config['ARGS']['episode_name'] == "MARL":
-                    json_file = os.path.join(self.project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.episode_name,
+                    json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.episode_name,
                                                                                                   self._config.DATASET.DATASET_NAME.split("_")[0],
                                                                                                   scene_name))
                     with gzip.open(json_file, "r") as fin:
@@ -687,7 +670,7 @@ class Env:
                     episodes = [episode for episode in episodes if episode['info']['difficulty'] == self.difficulty]
                     self._swap_building_every = len(episodes)
                 else:
-                    json_file = os.path.join(self.project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.episode_name,
+                    json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.episode_name,
                                                                                                   self._config.DATASET.DATASET_NAME.split("_")[0],
                                                                                                   scene_name))
                     if os.path.exists(json_file):
@@ -695,8 +678,8 @@ class Env:
                             episodes = json.loads(fin.read().decode("utf-8"))
                         episodes = [episode for episode in episodes if episode['info']['difficulty'] == self.difficulty]
                     else:
-                        os.makedirs(os.path.join(self.project_dir, 'data/episodes/{}'.format(self.episode_name)), exist_ok=True)
-                        os.makedirs(os.path.join(self.project_dir, 'data/episodes/{}/{}'.format(self.episode_name, self._config.DATASET.DATASET_NAME.split("_")[0])), exist_ok=True)
+                        os.makedirs(os.path.join(project_dir, 'data/episodes/{}'.format(self.episode_name)), exist_ok=True)
+                        os.makedirs(os.path.join(project_dir, 'data/episodes/{}/{}'.format(self.episode_name, self._config.DATASET.DATASET_NAME.split("_")[0])), exist_ok=True)
                         episodes = []
                     self._swap_building_every = int(np.ceil(self.args.num_episodes / len(self._scenes)))
                 self._episode_datasets.update({scene_name: episodes})

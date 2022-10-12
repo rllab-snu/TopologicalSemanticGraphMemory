@@ -27,8 +27,8 @@ from NuriUtils.debug_utils import log_time
 from NuriUtils.ncutils import cam_to_world, get_point_cloud_from_z_panoramic, get_camera_matrix
 from torchvision.ops import roi_align
 from env_utils.noisy_actions import CustomActionSpaceConfiguration
-
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 class ImageGoalEnv(RLEnv):
     metadata = {'render.modes': ['rgb_array']}
@@ -56,7 +56,7 @@ class ImageGoalEnv(RLEnv):
             task_config.TASK.TOP_DOWN_GRAPH_MAP.MAP_RESOLUTION = 1250
             task_config.TASK.TOP_DOWN_GRAPH_MAP.NUM_TOPDOWN_MAP_SAMPLE_POINTS = 10000
             task_config.TASK.TOP_DOWN_GRAPH_MAP.USE_DETECTOR = config.USE_DETECTOR
-            task_config.TASK.TOP_DOWN_GRAPH_MAP.PROJECT_DIR = config['ARGS']['project_dir']
+            task_config.TASK.TOP_DOWN_GRAPH_MAP.PROJECT_DIR = project_dir
             task_config.TASK.TOP_DOWN_GRAPH_MAP.DATASET_NAME = config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0]
             if getattr(config, 'map_more', False):
                 task_config.TASK.TOP_DOWN_GRAPH_MAP.MAP_RESOLUTION = 2500
@@ -157,10 +157,6 @@ class ImageGoalEnv(RLEnv):
             self.return_target_dist_score = False
         self.observation_space = SpaceDict(obs_dict)
 
-        try:
-            self.project_dir = self.args.project_dir
-        except:
-            self.project_dir = '.'
         self.gradual_diff = getattr(config,'gradual_diff',False)
         self.habitat_env.difficulty = config.DIFFICULTY
         if config.DIFFICULTY == 'easy':
@@ -183,13 +179,13 @@ class ImageGoalEnv(RLEnv):
         if self.config.TASK_CONFIG['ARGS']['mode'] == "eval":
             use_generated_one = False
             if self.config.TASK_CONFIG['ARGS']['episode_name'].split("_")[0] == "VGM":
-                json_file = os.path.join(self.habitat_env.project_dir, 'data/episodes/{}/{}/{}_{}.json'.format(self.habitat_env.episode_name, self.config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0], scene_name,
+                json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}_{}.json'.format(self.habitat_env.episode_name, self.config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0], scene_name,
                                                                                                           self.habitat_env.difficulty))
                 with open(json_file, 'r') as f:
                     episodes = json.load(f)
                 self.habitat_env._swap_building_every = len(episodes)
             elif self.config.TASK_CONFIG['ARGS']['episode_name'].split("_")[0] == "NRNS":
-                json_file = os.path.join(self.habitat_env.project_dir, 'data/episodes/{}/{}/{}/test_{}.json.gz'.format(self.habitat_env.episode_name.split("_")[0],
+                json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}/test_{}.json.gz'.format(self.habitat_env.episode_name.split("_")[0],
                                                                                                    self.config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0],
                                                                                                    self.habitat_env.episode_name.split("_")[1], self.habitat_env.difficulty))
 
@@ -198,7 +194,7 @@ class ImageGoalEnv(RLEnv):
                 episodes = [episode for episode in episodes if scene_name in episode['scene_id']]
                 self.habitat_env._swap_building_every = len(episodes)
             elif self.config.TASK_CONFIG['ARGS']['episode_name'] == "MARL":
-                json_file = os.path.join(self.habitat_env.project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.habitat_env.episode_name,
+                json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.habitat_env.episode_name,
                                                                                                          self.config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0],
                                                                                                           scene_name))
                 with gzip.open(json_file, "r") as fin:
@@ -206,7 +202,7 @@ class ImageGoalEnv(RLEnv):
                 episodes = [episode for episode in episodes if episode['info']['difficulty'] == self.habitat_env.difficulty]
                 self.habitat_env._swap_building_every = len(episodes)
             else:
-                json_file = os.path.join(self.habitat_env.project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.habitat_env.episode_name,
+                json_file = os.path.join(project_dir, 'data/episodes/{}/{}/{}.json.gz'.format(self.habitat_env.episode_name,
                                                                                                           self.config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0],
                                                                                                           scene_name))
                 if os.path.exists(json_file):
@@ -215,8 +211,8 @@ class ImageGoalEnv(RLEnv):
                     diff_episodes = [episode for episode in total_episodes if episode['info']['difficulty'] == self.habitat_env.difficulty]
                     episodes = total_episodes
                 else:
-                    os.makedirs(os.path.join(self.habitat_env.project_dir, 'data/episodes/{}'.format(self.habitat_env.episode_name)), exist_ok=True)
-                    os.makedirs(os.path.join(self.habitat_env.project_dir, 'data/episodes/{}/{}'.format(self.habitat_env.episode_name, self.config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0])), exist_ok=True)
+                    os.makedirs(os.path.join(project_dir, 'data/episodes/{}'.format(self.habitat_env.episode_name)), exist_ok=True)
+                    os.makedirs(os.path.join(project_dir, 'data/episodes/{}/{}'.format(self.habitat_env.episode_name, self.config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0])), exist_ok=True)
                     episodes = []
                 self.habitat_env._swap_building_every = int(np.ceil(self.args.num_episodes / len(self.habitat_env._scenes)))
             self.habitat_env._episode_datasets.update({scene_name: episodes})

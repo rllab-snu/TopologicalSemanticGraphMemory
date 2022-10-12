@@ -11,6 +11,7 @@ from env_utils.imagegoal_env import ImageGoalEnv
 from model.Graph.resnet_img import resnet18 as resnet18_img
 from model.Graph.resnet_obj import resnet18 as resnet18_obj
 from env_utils.env_wrapper.graph import ImgGraph, ObjGraph
+project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class ImageGoalGraphEnv(ImageGoalEnv):
@@ -18,7 +19,6 @@ class ImageGoalGraphEnv(ImageGoalEnv):
     def __init__(self, config: Config, dataset: Optional[Dataset] = None):
         super().__init__(config, dataset)
         self.config = config
-        self.project_dir = self.args.project_dir
         self.scene_data = config.scene_data
         self.input_shape = config.IMG_SHAPE
         self.object_feature_dim = config.features.object_feature_dim
@@ -74,7 +74,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
         img_encoder = resnet18_img(num_classes=feature_dim)
         dim_mlp = img_encoder.fc.weight.shape[1]
         img_encoder.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), img_encoder.fc)
-        ckpt_pth = os.path.join(self.project_dir, 'data/graph', 'Img_encoder.pth.tar')
+        ckpt_pth = os.path.join(project_dir, 'data/graph', 'Img_encoder.pth.tar')
         ckpt = torch.load(ckpt_pth, map_location='cpu')
         img_encoder.load_state_dict(ckpt)
         img_encoder.eval().to(self.torch_device)
@@ -84,7 +84,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
         obj_encoder = resnet18_obj(num_classes=feature_dim)
         dim_mlp = obj_encoder.fc.weight.shape[1]
         obj_encoder.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), obj_encoder.fc)
-        ckpt_pth = os.path.join(self.project_dir, 'data/graph', f'Obj_encoder.pth.tar')
+        ckpt_pth = os.path.join(project_dir, 'data/graph', f'Obj_encoder.pth.tar')
         ckpt = torch.load(ckpt_pth, map_location='cpu')
         state_dict = {k[len('module.encoder_k.'):]: v for k, v in ckpt['state_dict'].items() if 'module.encoder_k.' in k}
         obj_encoder.load_state_dict(state_dict)
