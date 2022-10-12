@@ -24,10 +24,9 @@ parser.add_argument("--config", type=str, default="./configs/TSGM.yaml", help="p
 parser.add_argument("--gpu", type=str, default="0")
 parser.add_argument("--version", type=str, required=True)
 parser.add_argument("--diff", choices=['random', 'easy', 'medium', 'hard'], default='')
-parser.add_argument("--split", choices=['val', 'train', 'val_mini','test'], default='val')
+parser.add_argument("--split", choices=['val', 'train', 'val_mini', 'test'], default='val')
 parser.add_argument('--eval-ckpt', type=str, required=True)
 parser.add_argument('--record', choices=['0','1','2','3'], default='0') # 0: no record 1: env.render 2: pose + action numerical traj 3: features
-parser.add_argument('--graph-th', type=float, default=0.75) # s_th
 parser.add_argument('--project-dir', default='.', type=str)
 parser.add_argument('--dataset', default='gibson' , type=str)
 parser.add_argument('--task', default='imggoalnav', type=str)
@@ -59,7 +58,6 @@ parser.add_argument('--sensor-noise-level', default=4.0, type=float)
 
 args = parser.parse_args()
 args.record = int(args.record)
-args.graph_th = float(args.graph_th)
 args.img_node_th = float(args.img_node_th)
 args.obj_node_th = float(args.obj_node_th)
 os.environ['GLOG_minloglevel'] = "3"
@@ -86,7 +84,7 @@ def eval_config(args):
     habitat_api_path = os.path.join(os.path.dirname(habitat.__file__), '../')
     print(args.config)
     config.TASK_CONFIG = add_panoramic_camera(config.TASK_CONFIG, normalize_depth=True)
-    config.TASK_CONFIG.DATASET.SPLIT = args.split #if 'gibson' in config.TASK_CONFIG.DATASET.DATA_PATH else 'val'
+    config.TASK_CONFIG.DATASET.SPLIT = args.split
     config.TASK_CONFIG.DATASET.SCENES_DIR = os.path.join(habitat_api_path, config.TASK_CONFIG.DATASET.SCENES_DIR)
     config.TASK_CONFIG.DATASET.DATA_PATH = os.path.join(habitat_api_path, config.TASK_CONFIG.DATASET.DATA_PATH)
     config.TASK_CONFIG.DATASET.DATASET_NAME = args.dataset
@@ -113,6 +111,7 @@ def eval_config(args):
     config.TASK_CONFIG.PROC_ID = 0
     config.freeze()
     return config
+
 
 def load(ckpt):
     if ckpt != 'none':
