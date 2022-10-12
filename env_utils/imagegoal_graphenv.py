@@ -288,9 +288,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
             self.record_imgs = []
             self.record_iter += 1
         obs_list = super().reset()
-        print("bb")
         obs = self.build_graph(obs_list, reset=True)
-        print("bb")
         return obs
 
     def draw_semantic_map_(self):

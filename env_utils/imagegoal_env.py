@@ -380,7 +380,6 @@ class ImageGoalEnv(RLEnv):
         obs = super().reset()
 
         self.num_goals = len(self._env._current_episode.goals)
-        print("cc")
         self._previous_measure = self.get_dist(self.curr_goal.position)
         self.initial_pose = self.current_position
         self.start_to_goal = self.habitat_env._sim.geodesic_distance(self.initial_pose, self.curr_goal.position)
@@ -398,12 +397,10 @@ class ImageGoalEnv(RLEnv):
         self.prev_rotation = self.current_rotation.copy()
         self.starting_distance = self.start_to_goal
         self.positions = [self.current_position]
-        print("cc")
         if self.args.mode == "collect":
             obs = self.process_obs_collect(obs)
         else:
             obs = self.process_obs(obs)
-        print("cc")
         self.obs = obs
         if self.render_map or self.record:
             self.get_xyz(obs['panoramic_depth'])
