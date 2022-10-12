@@ -287,23 +287,6 @@ class ILDataset(data.Dataset):
         vis_rotations = np.zeros([self.max_input_length, 4])
         vis_rotations[:input_length] = np.stack(input_data['rotation'][start_idx:start_idx+input_length])
 
-        # have_been = np.zeros([self.max_input_length])
-        # pp = input_data['position'][start_idx:end_idx][:input_length]
-        # for idx, pos_t in enumerate(pp):
-        #     if idx == 0:
-        #         have_been[idx] = 0
-        #     else:
-        #         dists = np.linalg.norm(pp[:idx] - pos_t, axis=1)
-        #         if len(dists) > 10:
-        #             far = np.where(dists > 1.0)[0]
-        #             near = np.where(dists[:-10] < 1.0)[0]
-        #             if len(far) > 0 and len(near) > 0 and (near < far.max()).any():
-        #                 have_been[idx] = 1
-        #             else:
-        #                 have_been[idx] = 0
-        #         else:
-        #             have_been[idx] = 0
-
         aux_info['distance'] = np.zeros([self.max_input_length])
         distances = np.stack(input_data['distance'][start_idx:start_idx+input_length])
         aux_info['distance'][:input_length] = torch.from_numpy(distances).float()
@@ -365,7 +348,6 @@ class ILDataset(data.Dataset):
         vis_info["len_data"] = len(input_data['position'][start_idx:start_idx+input_length])
         vis_info["input_image"] = input_rgb_out
         vis_info["target_goal"] = target_img_orig_out[targets.astype(np.int32)]
-        # vis_info["have_been"] = aux_info['have_been']
         vis_info["progress"] = aux_info['progress']
 
         if self.config.TASK_CONFIG.TASK.TASK_NAME == "ImgGoal" and train_info['target_loc_object'].sum() == 0:

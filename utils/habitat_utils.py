@@ -183,9 +183,6 @@ def observations_to_image(observation, info: Dict, mode='panoramic', local_imgs=
     if "collisions" in info and info['collisions'] is not None and mode != "demo":
         if info["collisions"]["is_collision"]:
             egocentric_view = draw_collision(egocentric_view)
-    #if 'direction_img' in observation.keys():
-    #    int_img = (observation['direction_img'] * 255).astype(np.uint8)
-    #    egocentric_view = np.concatenate([int_img, egocentric_view],0)
     frame = egocentric_view
 
     top_down_height = frame.shape[0]

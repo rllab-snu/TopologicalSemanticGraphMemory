@@ -411,17 +411,6 @@ class ImageGoalEnv(RLEnv):
         obs_dict['target_goal'] = self.habitat_env.target_obs['target_goal'][self.curr_goal_idx]
         obs.update(self.habitat_env.target_obs)
 
-        # if self.timestep == 0:
-        #     have_been = False
-        # else:
-        #     if len(self.positions) < 10:
-        #         have_been = False
-        #     else:
-        #         dists = np.linalg.norm(np.array(self.positions) - np.expand_dims(np.array(self.current_position), 0), axis=1)
-        #         far = np.where(dists > 1.0)[0]
-        #         near = np.where(dists[:-10] < 1.0)[0]
-        #         have_been = len(far) > 0 and len(near) > 0 and (near < far.max()).any()
-        # obs_dict['have_been'] = np.array(have_been).astype(np.float32).reshape(1)
         obs_dict['distance'] = self.curr_distance
         target_dist_score = np.maximum(1 - np.array(obs_dict['distance']) / 2., 0.0)
         obs_dict['target_dist_score'] = np.array(target_dist_score).astype(np.float32).reshape(1)
@@ -517,17 +506,6 @@ class ImageGoalEnv(RLEnv):
         obs_dict["map_pose"] = self.get_sim_location_with_poserot(obs_dict['position'], q.from_float_array(obs_dict['rotation']))
         obs.update(self.habitat_env.target_obs)
 
-        # if self.timestep == 0:
-        #     have_been = False
-        # else:
-        #     if len(self.positions) < 10:
-        #         have_been = False
-        #     else:
-        #         dists = np.linalg.norm(np.array(self.positions) - np.expand_dims(np.array(self.current_position), 0), axis=1)
-        #         far = np.where(dists > 1.0)[0]
-        #         near = np.where(dists[:-10] < 1.0)[0]
-        #         have_been = len(far) > 0 and len(near) > 0 and (near < far.max()).any()
-        # obs_dict['have_been'] = np.array(have_been).astype(np.float32).reshape(1)
         obs_dict['distance'] = self.curr_distance
         target_dist_score = np.maximum(1 - np.array(obs_dict['distance']) / 2., 0.0)
         obs_dict['target_dist_score'] = np.array(target_dist_score).astype(np.float32).reshape(1)

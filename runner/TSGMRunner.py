@@ -16,7 +16,6 @@ class TSGMRunner(BaseRunner):
         observation_space = SpaceDict({
             'panoramic_rgb': Box(low=0, high=256, shape=(64, 256, 3), dtype=np.float32),
             'panoramic_depth': Box(low=0, high=256, shape=(64, 256, 1), dtype=np.float32),
-            'panoramic_semantic': Box(low=0, high=256, shape=(64, 256, 1), dtype=np.float32),
             'target_goal': Box(low=0, high=256, shape=(64, 256, 3), dtype=np.float32),
             'step': Box(low=0, high=500, shape=(1,), dtype=np.float32),
             'prev_act': Box(low=0, high=3, shape=(1,), dtype=np.int32),

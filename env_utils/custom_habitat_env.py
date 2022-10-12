@@ -775,7 +775,6 @@ class Env:
         current_episode = self.current_episode
         current_episode.curr_goal_idx = self.curr_goal_idx
         observations['target_idx'] = self.curr_goal_idx
-        # observations['target_goal'] = observations['target_goal'][..., :4]
         self.target_obs['target_goal'] = observations['target_goal'][..., :4]
         self._task.measurements.update_measures(
             episode=current_episode, action=action, task=self.task, obs=observations, position=self._sim.get_agent(0).get_state().position, dataset=self.dn

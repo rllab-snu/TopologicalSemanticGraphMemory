@@ -468,7 +468,7 @@ class PPOTrainer(BaseRLTrainer):
                       ['obj_memory_feat', 'obj_memory_category', 'obj_memory_mask', 'obj_memory_A_OV', 'obj_memory_time']
         targ_object_list = ['target_loc_object', 'target_loc_object_category', 'target_loc_object_mask', 'target_loc_object_score']
         curr_object_list = ['object', 'object_category', 'object_mask', 'object_score']
-        aux_list = ['is_goal', 'progress']
+        aux_list = ['progress', 'is_goal']
         OBS_LIST = self.config.OBS_TO_SAVE + memory_list + targ_object_list + curr_object_list + aux_list + ['img_memory_idx', 'target_goal']
         self.num_processes = num_train_processes
         rollouts = RolloutStorage(
