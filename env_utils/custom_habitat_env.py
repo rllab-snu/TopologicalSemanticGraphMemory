@@ -221,7 +221,6 @@ class Env:
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = self._config.detector_th
         cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = self._config.detector_th
         try:
-            print('detector gpu id', cfg.MODEL.DEVICE)
             cfg.MODEL.DEVICE = self._config.DETECTOR_GPU_ID
         except:
             pass

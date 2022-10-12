@@ -555,19 +555,6 @@ class TopDownGraphMap(Measure):
             agent_radius_px=int(self.point_padding * 4)
         )
         fog_of_war_mask = self._fog_of_war_mask
-        # range_x = np.where(np.any(top_down_map.mean(-1) - 255, axis=1))[0]
-        # range_y = np.where(np.any(top_down_map.mean(-1) - 255, axis=0))[0]
-        # pad = 10
-        # if len(range_x) > 0 and len(range_y) > 0:
-        #     self._ind_x_min = range_x[0]
-        #     self._ind_x_max = range_x[-1]
-        #     self._ind_y_min = range_y[0]
-        #     self._ind_y_max = range_y[-1]
-        #
-        #     min_x = max(self._ind_x_min - pad, 0)
-        #     min_y = max(self._ind_y_min - pad, 0)
-        #     top_down_map = top_down_map[min_x: self._ind_x_max + pad, min_y: self._ind_y_max + pad]
-        #     fog_of_war_mask = fog_of_war_mask[min_x: self._ind_x_max + pad, min_y: self._ind_y_max + pad]
 
         self._metric = {
             "map": top_down_map,
@@ -604,20 +591,6 @@ class TopDownGraphMap(Measure):
             agent_radius_px=int(self.point_padding * 4)
         )
         fog_of_war_mask = self._fog_of_war_mask
-
-        # range_x = np.where(np.any(top_down_map.mean(-1) - 255, axis=1))[0]
-        # range_y = np.where(np.any(top_down_map.mean(-1) - 255, axis=0))[0]
-        # pad = 10
-        # if len(range_x) > 0 and len(range_y) > 0:
-        #     self._ind_x_min = range_x[0]
-        #     self._ind_x_max = range_x[-1]
-        #     self._ind_y_min = range_y[0]
-        #     self._ind_y_max = range_y[-1]
-        #
-        #     min_x = max(self._ind_x_min - pad, 0)
-        #     min_y = max(self._ind_y_min - pad, 0)
-        #     top_down_map = top_down_map[min_x: self._ind_x_max + pad, min_y: self._ind_y_max + pad]
-        #     fog_of_war_mask = fog_of_war_mask[min_x: self._ind_x_max + pad, min_y: self._ind_y_max + pad]
 
         self._metric = {
             "map": top_down_map,
@@ -734,31 +707,6 @@ class TopDownGraphMap(Measure):
             self._draw_point(node_position, node_color_index)
         self._draw_boundary(self.node_list[curr_info['curr_node']], CURR_NODE)
         self.curr_info = curr_info
-
-    # def draw_object_graph_on_map(self, node_list, node_category, affinity, graph_mask, curr_info={}, flags=None, goal_id=None):
-    #     self.object_node_list = node_list
-    #     self.object_node_category = []
-    #     draw_point_list = [] #point_padding
-    #     node_category = node_category[graph_mask==1]
-    #     for idx, node_position in enumerate(node_list):
-    #         if self.use_detector:
-    #             draw_point_list.append([node_position, OBJECT_CATEGORY_NODES[DETECTION_CATEGORIES[int(node_category[idx])]]])
-    #             self.object_node_category.append(DETECTION_CATEGORIES[int(node_category[idx])])
-    #         else:
-    #             draw_point_list.append([node_position, OBJECT_CATEGORY_NODES[CATEGORIES[self.dn][int(node_category[idx])]]])
-    #             self.object_node_category.append(CATEGORIES[self.dn][int(node_category[idx])])
-    #
-    #     for node_position, node_color in draw_point_list:
-    #         t_x, t_y = maps.to_grid(
-    #             node_position[2],
-    #             node_position[0],
-    #             self._top_down_map.shape[0:2],
-    #             sim=self._sim,
-    #         )
-    #         triangle_cnt = np.array(np.array([int(t_y), int(t_x)]) + np.array([pt1, pt2, pt3]).astype(np.int32))
-    #         cv2.drawContours(self._top_down_map, [triangle_cnt], 0, [248, 106, 176], -1)
-    #         self._draw_point(node_position, node_color, point_padding=20)
-    #     self.curr_object_info = curr_info
 
     def draw_object_graph_on_map(self, node_list, node_category, node_score, vis_node_list, affinity, graph_mask, curr_info={}, flags=None, goal_id=None):
         self.object_node_list = node_list
