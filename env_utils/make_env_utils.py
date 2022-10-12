@@ -246,13 +246,10 @@ def construct_envs(config,env_class, mode='vectorenv', make_env_fn=make_env_fn, 
         if len(training_scenes) > 0:
             task_config.DATASET.CONTENT_SCENES = scene_splits[i]
         task_config = add_panoramic_camera(task_config, has_target='search' in proc_config.ENV_NAME.lower() or getattr(proc_config,'TASK_TYPE', True))
-        task_config = add_orthographic_camera(task_config)
-        task_config = add_equirect_camera(task_config)
 
         task_config.SIMULATOR.HABITAT_SIM_V0.GPU_DEVICE_ID = (
             config.SIMULATOR_GPU_ID
         )
-        # task_config.SIMULATOR.HABITAT_SIM_V0.GPU_GPU = config.SIMULATOR.HABITAT_SIM_V0.GPU_GPU #habitat_sim.cuda_enabled and not fix_on_cpu
 
         proc_config.freeze()
         configs.append(proc_config)
