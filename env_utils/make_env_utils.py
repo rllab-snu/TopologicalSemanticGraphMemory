@@ -8,16 +8,15 @@ import habitat
 from habitat import Config, Env, RLEnv, make_dataset
 import os
 import numpy as np
+from env_utils.env_wrapper import *
 
 def make_env_fn(
     config: Config, env_class: Type[Union[Env, RLEnv]], rank: int, kwargs
 ) -> Env:
 
-    # print('make-env')
     env = env_class(config=config)
     env.seed(rank)
     env.number_of_episodes = 1000
-    # env = DetectorWrapper(env, config)
     return env
 
 
@@ -121,7 +120,7 @@ def add_panoramic_camera(task_config, normalize_depth=True, has_target=True):
         task_config.TASK.DISTANCE_TO_GOAL.TYPE = 'Custom_DistanceToGoal'
     return task_config
 
-from env_utils.env_wrapper import *
+
 def construct_envs(config,env_class, mode='vectorenv', make_env_fn=make_env_fn, run_type='train', no_val=False, fix_on_cpu=False):
     num_processes, num_val_processes = config.NUM_PROCESSES, config.NUM_VAL_PROCESSES
     total_num_processes = num_processes + num_val_processes
@@ -211,7 +210,6 @@ def construct_envs(config,env_class, mode='vectorenv', make_env_fn=make_env_fn, 
                 tuple(zip(configs, env_classes, range(total_num_processes), [{'run_type':run_type}]*total_num_processes))
             ),
         )
-
         envs = eval(configs[0].WRAPPER)(envs, configs[0])
         print('[make_env_utils] Using Vector Env Wrapper - ', configs[0].WRAPPER)
     else:
