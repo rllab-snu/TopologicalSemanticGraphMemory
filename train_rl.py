@@ -165,8 +165,8 @@ def run_exp(config: str, opts=None, *args, **kwargs) -> None:
     config.record = arguments.record > 0
     config.OBJECTGRAPH.SPARSE = True
     arguments.gpu = arguments.gpu.split(',')
-    config.TORCH_GPU_ID = arguments.gpu[0]
-    config.SIMULATOR_GPU_ID = arguments.gpu[1]
+    config.TORCH_GPU_ID = int(arguments.gpu[0])
+    config.SIMULATOR_GPU_ID = int(arguments.gpu[1])
     config.freeze()
     np.random.seed(config.TASK_CONFIG.SEED)
     random.seed(config.TASK_CONFIG.SEED)
