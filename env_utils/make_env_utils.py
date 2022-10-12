@@ -20,56 +20,6 @@ def make_env_fn(
     # env = DetectorWrapper(env, config)
     return env
 
-def add_equirect_camera(task_config):
-    cam_height = task_config.CAMERA_HEIGHT
-    sensors = task_config.SIMULATOR.AGENT_0.SENSORS
-    new_camera_config = task_config.SIMULATOR.RGB_SENSOR.clone()
-    new_camera_config.TYPE = 'EquirectRGBSensor'
-    new_camera_config.WIDTH = 1024
-    new_camera_config.HEIGHT = 512
-    new_camera_config.POSITION = [0, cam_height, 0]
-    # new_camera_config.ORIENTATION = [0, 0, 0]
-    task_config.SIMULATOR.update({'EQUIRECT_RGB_SENSOR': new_camera_config})
-    sensors.append('EQUIRECT_RGB_SENSOR')
-    new_camera_config = task_config.SIMULATOR.DEPTH_SENSOR.clone()
-    new_camera_config.TYPE = 'EquirectDepthSensor'
-    new_camera_config.WIDTH = 1024
-    new_camera_config.HEIGHT = 512
-    new_camera_config.POSITION = [0, cam_height, 0]
-    task_config.SIMULATOR.update({'EQUIRECT_DEPTH_SENSOR': new_camera_config})
-    sensors.append('EQUIRECT_DEPTH_SENSOR')
-    task_config.SIMULATOR.AGENT_0.SENSORS = sensors
-    return task_config
-
-def add_orthographic_camera(task_config, res=2000):
-    sensors = task_config.SIMULATOR.AGENT_0.SENSORS
-    new_camera_config = task_config.SIMULATOR.RGB_SENSOR.clone()
-    new_camera_config.TYPE = 'OrthoRGBSensor'
-    new_camera_config.WIDTH = res
-    new_camera_config.HEIGHT = res
-    new_camera_config.POSITION = [0., 1., 0.]
-    new_camera_config.SENSOR_SUBTYPE = 'ORTHOGRAPHIC'
-    task_config.SIMULATOR.update({'ORTHO_RGB_SENSOR': new_camera_config})
-    sensors.append('ORTHO_RGB_SENSOR')
-    new_camera_config = task_config.SIMULATOR.DEPTH_SENSOR.clone()
-    new_camera_config.TYPE = 'OrthoDepthSensor'
-    new_camera_config.WIDTH = res
-    new_camera_config.HEIGHT = res
-    new_camera_config.POSITION = [0., 1., 0.]
-    new_camera_config.SENSOR_SUBTYPE = 'ORTHOGRAPHIC'
-    task_config.SIMULATOR.update({'ORTHO_DEPTH_SENSOR': new_camera_config})
-    sensors.append('ORTHO_DEPTH_SENSOR')
-    new_camera_config = task_config.SIMULATOR.SEMANTIC_SENSOR.clone()
-    new_camera_config.TYPE = 'OrthoSemanticSensor'
-    new_camera_config.WIDTH = res
-    new_camera_config.HEIGHT = res
-    new_camera_config.POSITION = [0., 1., 0.]
-    new_camera_config.SENSOR_SUBTYPE = 'ORTHOGRAPHIC'
-    task_config.SIMULATOR.update({'ORTHO_SEMANTIC_SENSOR': new_camera_config})
-    sensors.append('ORTHO_SEMANTIC_SENSOR')
-    task_config.SIMULATOR.AGENT_0.SENSORS = sensors
-    return task_config
-
 
 def add_panoramic_camera(task_config, normalize_depth=True, has_target=True):
     num_of_camera = task_config.NUM_CAMERA
