@@ -379,7 +379,7 @@ class ImageGoalEnv(RLEnv):
         self.object_categories = []
         obs = super().reset()
 
-        self.num_goals = len(self.current_episode.goals)
+        self.num_goals = len(self._env._current_episode.goals)
         print("cc")
         self._previous_measure = self.get_dist(self.curr_goal.position)
         self.initial_pose = self.current_position
