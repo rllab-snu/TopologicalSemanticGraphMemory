@@ -72,6 +72,7 @@ torch.backends.cudnn.enabled = True
 
 device = 'cpu' if args.gpu == '-1' else 'cuda:{}'.format(args.gpu)
 
+
 def eval_config(args):
     config = get_config(args.config, base_task_config_path="./configs/{}_{}.yaml".format(args.task, args.dataset), arguments=vars(args))
     config.defrost()
@@ -81,7 +82,7 @@ def eval_config(args):
     config.DIFFICULTY = args.diff
     config.scene_data = args.dataset
     habitat_api_path = os.path.join(os.path.dirname(habitat.__file__), '../')
-    print(args.config)
+    # print(args.config)
     config.TASK_CONFIG = add_panoramic_camera(config.TASK_CONFIG, normalize_depth=True)
     config.TASK_CONFIG.DATASET.SPLIT = args.split
     config.TASK_CONFIG.DATASET.SCENES_DIR = os.path.join(habitat_api_path, config.TASK_CONFIG.DATASET.SCENES_DIR)

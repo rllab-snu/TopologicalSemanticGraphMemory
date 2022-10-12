@@ -148,8 +148,6 @@ def run_exp(config: str, opts=None, *args, **kwargs) -> None:
     if arguments.strict_stop:
         config.TASK_CONFIG.TASK.SUCCESS_DISTANCE = float(np.clip(float(config.TASK_CONFIG.TASK.SUCCESS_DISTANCE) - 0.5, 0.0, 1.0))
         config.RL.SUCCESS_DISTANCE = float(np.clip(float(config.RL.SUCCESS_DISTANCE) - 0.5, 0.0, 1.0))
-    print(config.TASK_CONFIG.TASK.SUCCESS_DISTANCE)
-    print(config.RL.SUCCESS_DISTANCE)
     config.TRAINER_NAME = config.RL_TRAINER_NAME
     config.features.object_category_num = 80
     config.memory.num_objects = arguments.num_object
