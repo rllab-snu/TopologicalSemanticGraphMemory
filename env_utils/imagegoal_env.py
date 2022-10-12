@@ -373,11 +373,13 @@ class ImageGoalEnv(RLEnv):
             self.mapper.draw_semantic_map(xyz, category)
 
     def reset(self):
+        print("cc")
         self._previous_action = -1
         self.timestep = 0
         self.object_positions = []
         self.object_categories = []
         obs = super().reset()
+        print("cc")
 
         self.num_goals = len(self.current_episode.goals)
         self._previous_measure = self.get_dist(self.curr_goal.position)
