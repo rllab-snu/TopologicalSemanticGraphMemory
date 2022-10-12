@@ -164,8 +164,9 @@ def run_exp(config: str, opts=None, *args, **kwargs) -> None:
     config.CHECKPOINT_FOLDER = os.path.join(arguments.project_dir, config.CHECKPOINT_FOLDER)
     config.record = arguments.record > 0
     config.OBJECTGRAPH.SPARSE = True
-    config.TORCH_GPU_ID = args.gpu.split(",")[0]
-    config.SIMULATOR_GPU_ID = args.gpu.split(",")[1]
+    args.gpu = [int(g) for g in args.gpu]
+    config.TORCH_GPU_ID = args.gpu[0]
+    config.SIMULATOR_GPU_ID = args.gpu[1]
     config.freeze()
     np.random.seed(config.TASK_CONFIG.SEED)
     random.seed(config.TASK_CONFIG.SEED)
