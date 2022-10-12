@@ -71,7 +71,7 @@ def collect_graph(data_list):
                 max_num_img_node = env.imggraph.num_node()
                 max_num_obj_node = env.objgraph.num_node()
                 img_memory_dict = {
-                    'img_memory': env.imggraph.graph_memory[:max_num_img_node].copy(),
+                    'img_memory_feat': env.imggraph.graph_memory[:max_num_img_node].copy(),
                     'img_memory_pose': np.stack(env.imggraph.node_position_list).copy(),
                     'img_memory_mask': env.imggraph.graph_mask[:max_num_img_node].copy(),
                     'img_memory_A': env.imggraph.A[:max_num_img_node, :max_num_img_node].copy(),
@@ -79,7 +79,7 @@ def collect_graph(data_list):
                     'img_memory_time': env.imggraph.graph_time[:max_num_img_node].copy()
                 }
                 obj_memory_dict = {
-                    'obj_memory': env.objgraph.graph_memory[:max_num_obj_node].copy(),
+                    'obj_memory_feat': env.objgraph.graph_memory[:max_num_obj_node].copy(),
                     'obj_memory_pose': np.stack(env.objgraph.node_position_list).copy(),
                     'obj_memory_score': env.objgraph.graph_score[:max_num_obj_node].copy(),
                     'obj_memory_category': env.objgraph.graph_category[:max_num_obj_node].copy(),

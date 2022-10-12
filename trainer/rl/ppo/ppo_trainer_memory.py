@@ -467,8 +467,8 @@ class PPOTrainer_Memory(BaseRLTrainer):
 
         num_train_processes, num_val_processes = self.config.NUM_PROCESSES, self.config.NUM_VAL_PROCESSES
         total_processes = num_train_processes + num_val_processes
-        memory_list = ['img_memory', 'img_memory_relpose', 'img_memory_mask', 'img_memory_A', 'img_memory_time'] +\
-                      ['obj_memory', 'obj_memory_category', 'obj_memory_mask', 'obj_memory_A_OV', 'obj_memory_time']
+        memory_list = ['img_memory_feat', 'img_memory_relpose', 'img_memory_mask', 'img_memory_A', 'img_memory_time'] +\
+                      ['obj_memory_feat', 'obj_memory_category', 'obj_memory_mask', 'obj_memory_A_OV', 'obj_memory_time']
         targ_object_list = ['target_loc_object', 'target_loc_object_category', 'target_loc_object_mask', 'target_loc_object_score']
         curr_object_list = ['object', 'object_category', 'object_mask', 'object_score']
         aux_list = ['have_been', 'have_seen', 'is_img_target', 'is_obj_target']

@@ -191,14 +191,14 @@ class Perception(nn.Module):
         B = observations['img_memory_mask'].shape[0]
         max_node_num = observations['img_memory_mask'].sum(dim=1).max().long()
         global_relative_time = observations['step'].unsqueeze(1) - observations['img_memory_time'][:, :max_node_num]
-        img_memory = self.time_embedding(observations['img_memory'][:, :max_node_num], global_relative_time)
+        img_memory = self.time_embedding(observations['img_memory_feat'][:, :max_node_num], global_relative_time)
         img_memory_mask = observations['img_memory_mask'][:, :max_node_num]
         I = torch.eye(max_node_num).unsqueeze(0).repeat(B, 1, 1).cuda()
         img_memory_A = observations['img_memory_A'][:, :max_node_num, :max_node_num] + I
 
         max_obj_node_num = observations['obj_memory_mask'].sum(dim=1).max().long()
         object_relative_time = observations['step'].unsqueeze(1) - observations['obj_memory_time'][:, :max_obj_node_num]
-        obj_memory = observations['obj_memory'][:, :max_obj_node_num]
+        obj_memory = observations['obj_memory_feat'][:, :max_obj_node_num]
         obj_memory = self.Cat(torch.cat([obj_memory, self.obj_category_embedding(observations['obj_memory_category'][:, :max_obj_node_num])], -1))
         obj_memory = self.obj_time_embedding(obj_memory, object_relative_time)
         object_mask = observations['obj_memory_mask'][:, :max_obj_node_num]

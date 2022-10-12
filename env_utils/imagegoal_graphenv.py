@@ -25,6 +25,8 @@ class ImageGoalGraphEnv(ImageGoalEnv):
         self.num_objects = config.memory.num_objects
         self.feature_dim = config.memory.img_embedding_dim
         self.torch_device = 'cuda:' + str(config.TORCH_GPU_ID) if torch.cuda.device_count() > 0 else 'cpu'
+        self.transform_eval = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+
         self.img_node_th = config.TASK_CONFIG.img_node_th
         self.obj_node_th = config.TASK_CONFIG.obj_node_th
         self.imggraph = ImgGraph(config)
@@ -34,7 +36,6 @@ class ImageGoalGraphEnv(ImageGoalEnv):
         self.obj_encoder = self.load_obj_encoder(config.features.object_feature_dim)
 
         self.reset_all_memory()
-        self.transform_eval = transforms.Compose([transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
         
         if self.args.record > 0:
             global VIDEO_DIR
@@ -52,7 +53,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
 
         self.dn = config.TASK_CONFIG.DATASET.DATASET_NAME.split("_")[0]
         self.observation_space.spaces.update({
-            'img_memory': Box(low=-np.Inf, high=np.Inf, shape=(self.imggraph.M, self.feature_dim), dtype=np.float32),
+            'img_memory_feat': Box(low=-np.Inf, high=np.Inf, shape=(self.imggraph.M, self.feature_dim), dtype=np.float32),
             'img_memory_pose': Box(low=-np.Inf, high=np.Inf, shape=(self.imggraph.M, 3), dtype=np.float32),
             'img_memory_mask': Box(low=0, high=1, shape=(self.imggraph.M,), dtype=np.bool),
             'img_memory_A': Box(low=0, high=1, shape=(self.imggraph.M, self.imggraph.M), dtype=np.bool),
@@ -60,7 +61,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
             'img_memory_time': Box(low=-np.Inf, high=np.Inf, shape=(self.imggraph.M,), dtype=np.float32)
         })
         self.observation_space.spaces.update({
-            'obj_memory': Box(low=-np.Inf, high=np.Inf, shape=(self.objgraph.M, self.object_feature_dim), dtype=np.float32),
+            'obj_memory_feat': Box(low=-np.Inf, high=np.Inf, shape=(self.objgraph.M, self.object_feature_dim), dtype=np.float32),
             'obj_memory_score': Box(low=-np.Inf, high=np.Inf, shape=(self.objgraph.M,), dtype=np.float32),
             'obj_memory_pose': Box(low=-np.Inf, high=np.Inf, shape=(self.objgraph.M, 3), dtype=np.float32),
             'obj_memory_category': Box(low=-np.Inf, high=np.Inf, shape=(self.objgraph.M,), dtype=np.float32),
@@ -69,7 +70,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
             'obj_memory_time': Box(low=-np.Inf, high=np.Inf, shape=(self.objgraph.M,), dtype=np.float32)
         })
 
-    def load_img_encoder(self,feature_dim):
+    def load_img_encoder(self, feature_dim):
         img_encoder = resnet18_img(num_classes=feature_dim)
         dim_mlp = img_encoder.fc.weight.shape[1]
         img_encoder.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), img_encoder.fc)
@@ -191,42 +192,41 @@ class ImageGoalGraphEnv(ImageGoalEnv):
         # found = np.array(done) + close.squeeze()  # (T,T): is in 0 state, (T,F): not much moved, (F,T): impossible, (F,F): moved much
         self.found_prev = False
         self.found = found
+        self.found_in_memory = False
+        to_add = False
         if found:
             self.imggraph.update_nodes(self.imggraph.last_localized_node_idx, time)
             self.found_prev = True
-        self.found_in_memory = False
-        # 모든 메모리 노드 체크
-        check_list = 1 - self.imggraph.graph_mask[:self.imggraph.num_node()]
-        # 바로 직전 노드는 체크하지 않는다.
-        check_list[self.imggraph.last_localized_node_idx] = 1.0
-        # if found: #localize 됐다면 다른 메모리 노드들을 체크하지 않는다
-        #     check_list = np.ones_like(check_list)
-        to_add = False
-        while not found:
-            not_checked_yet = np.where((1 - check_list))[0]
-            neighbor_embedding = self.imggraph.graph_memory[not_checked_yet]
-            num_to_check = len(not_checked_yet)
-            if num_to_check == 0:
-                # 과거의 노드와도 다르고, 메모리와도 모두 다르다면 새로운 노드로 추가
-                to_add = True
-                break
-            else:
-                # 메모리 노드에 존재하는지 체크
-                close, prob = self.is_close(new_embedding[None], neighbor_embedding, return_prob=True, th=self.img_node_th)
-                close = close[0];  prob = prob[0]
-                close_idx = np.where(close)[0]
-                if len(close_idx) >= 1:
-                    found_node = not_checked_yet[prob.argmax()]
+        else:
+            # 모든 메모리 노드 체크
+            check_list = 1 - self.imggraph.graph_mask[:self.imggraph.num_node()]
+            # 바로 직전 노드는 체크하지 않는다.
+            check_list[self.imggraph.last_localized_node_idx] = 1.0
+            while not found:
+                not_checked_yet = np.where((1 - check_list))[0]
+                neighbor_embedding = self.imggraph.graph_memory[not_checked_yet]
+                num_to_check = len(not_checked_yet)
+                if num_to_check == 0:
+                    # 과거의 노드와도 다르고, 메모리와도 모두 다르다면 새로운 노드로 추가
+                    to_add = True
+                    break
                 else:
-                    found_node = None
-                if found_node is not None:
-                    found = True
-                    if abs(time - self.imggraph.graph_time[found_node]) > 20:
-                        self.found_in_memory = True #만약 새롭게 찾은 노드가 오랜만에 돌아온 노드라면 found_in_memory를 True로 바꿔준다
-                    self.imggraph.update_node(found_node, time, new_embedding)
-                    self.imggraph.add_edge(found_node, self.imggraph.last_localized_node_idx)
-                    self.imggraph.record_localized_state(found_node, new_embedding)
-                check_list[found_node] = 1.0
+                    # 메모리 노드에 존재하는지 체크
+                    close, prob = self.is_close(new_embedding[None], neighbor_embedding, return_prob=True, th=self.img_node_th)
+                    close = close[0];  prob = prob[0]
+                    close_idx = np.where(close)[0]
+                    if len(close_idx) >= 1:
+                        found_node = not_checked_yet[prob.argmax()]
+                    else:
+                        found_node = None
+                    if found_node is not None:
+                        found = True
+                        if abs(time - self.imggraph.graph_time[found_node]) > 20:
+                            self.found_in_memory = True #만약 새롭게 찾은 노드가 오랜만에 돌아온 노드라면 found_in_memory를 True로 바꿔준다
+                        self.imggraph.update_node(found_node, time, new_embedding)
+                        self.imggraph.add_edge(found_node, self.imggraph.last_localized_node_idx)
+                        self.imggraph.record_localized_state(found_node, new_embedding)
+                    check_list[found_node] = 1.0
 
         if to_add:
             new_node_idx = self.imggraph.num_node()
@@ -327,7 +327,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
 
     def get_img_memory(self):
         img_memory_dict = {
-            'img_memory': self.imggraph.graph_memory,
+            'img_memory_feat': self.imggraph.graph_memory,
             'img_memory_mask': self.imggraph.graph_mask,
             'img_memory_A': self.imggraph.A,
             'img_memory_idx': self.imggraph.last_localized_node_idx,
@@ -337,7 +337,7 @@ class ImageGoalGraphEnv(ImageGoalEnv):
 
     def get_obj_memory(self):
         obj_memory_dict = {
-            'obj_memory': self.objgraph.graph_memory,
+            'obj_memory_feat': self.objgraph.graph_memory,
             'obj_memory_score': self.objgraph.graph_score,
             'obj_memory_category': self.objgraph.graph_category,
             'obj_memory_mask': self.objgraph.graph_mask,

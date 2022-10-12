@@ -302,7 +302,7 @@ def evaluate(eval_config, state_dict, ckpt_config):
                         num_img_node = env.imggraph.num_node()
                         num_obj_node = env.objgraph.num_node()
                         img_memory_dict = {
-                            'img_memory': env.imggraph.graph_memory[:num_img_node].copy(),
+                            'img_memory_feat': env.imggraph.graph_memory[:num_img_node].copy(),
                             'img_memory_pose': np.stack(env.imggraph.node_position_list).copy(),
                             'img_memory_mask': env.imggraph.graph_mask[:num_img_node].copy(),
                             'img_memory_A': env.imggraph.A[:num_img_node, :num_img_node].copy(),
@@ -310,7 +310,7 @@ def evaluate(eval_config, state_dict, ckpt_config):
                             'img_memory_time': env.imggraph.graph_time[:num_img_node].copy()
                         }
                         obj_memory_dict = {
-                            'obj_memory': env.objgraph.graph_memory[:num_obj_node].copy(),
+                            'obj_memory_feat': env.objgraph.graph_memory[:num_obj_node].copy(),
                             'obj_memory_pose': np.stack(env.objgraph.node_position_list[0]),
                             'obj_memory_score': env.objgraph.graph_score[:num_obj_node].copy(),
                             'obj_memory_category': env.objgraph.graph_category[:num_obj_node].copy(),
