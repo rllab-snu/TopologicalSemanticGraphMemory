@@ -84,7 +84,7 @@ class TSGMRunner(BaseRunner):
         if preds[1] is not None:
             pred_goal = torch.sigmoid(preds[1][0])
             pred_goal_str = 'pred_goal: '
-            pred_goal_str += '%.3f '%(pred_goal_str.item())
+            pred_goal_str += '%.3f '%(pred_goal.item())
         else: pred_goal_str = ''
 
         log_str = progress_str + ' ' + pred_goal_str
