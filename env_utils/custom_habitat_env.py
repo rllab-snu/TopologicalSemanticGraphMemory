@@ -435,30 +435,6 @@ class Env:
         episode = NavigationEpisode(**episode_info)
         return episode, found
 
-    def get_floor(self, position, scan_name):
-        end_point = np.asarray(position)
-        z = end_point[1]
-        floor = "0"
-        zs = []
-        for key, confs in self.render_configs[scan_name].items():
-            zs.append(float(confs[2]))
-        if len(zs) == 1:
-            return floor
-        i = 0
-        for key, confs in self.render_configs[scan_name].items():
-            z_min = float(zs[i])
-            try:
-                z_max = float(zs[i + 1])
-            except:
-                z_max = 100
-            if z < z_min - 0.1:
-                break
-            floor = key
-            if z < z_max - 0.1:
-                break
-            i += 1
-        return floor
-
     def get_target_objects(self, goal_position, goal_rotation):
         goal_state = self._sim.get_observations_at(goal_position, goal_rotation, keep_agent_at_new_pose=True)
         if self._config.USE_DETECTOR:
@@ -792,7 +768,6 @@ class Env:
         agent_dict = {'START_POSITION': self._current_episode.start_position,
                       'START_ROTATION': quat_to_coeffs(q.from_float_array(self._current_episode.start_rotation)).tolist(),
                       'IS_SET_START_STATE': True}
-        self.floor = self.get_floor(self._current_episode.start_position, self.scene_name)
         self._config.SIMULATOR['AGENT_0'].update(agent_dict)
         self._config.freeze()
         self.reconfigure(self._config)
