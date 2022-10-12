@@ -13,10 +13,11 @@ import imageio
 from scipy.ndimage.interpolation import rotate
 import cv2
 import csv
-from utils.statics import STANDARD_COLORS, CATEGORIES, DETECTION_CATEGORIES, ALL_CATEGORIES
+from utils.statics import CATEGORIES, DETECTION_CATEGORIES
 import matplotlib.patches as mpatches
 import glob
 from utils.vis_utils import colors_rgb
+project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -55,26 +56,22 @@ parser.add_argument(
     type=int,
 )
 args = parser.parse_args()
-# index = [12]
 fps = 20
 args.data_dir = os.path.join(args.data_dir, args.tag)
 os.makedirs(args.data_dir, exist_ok=True)
 os.makedirs(os.path.join(args.data_dir, "output"), exist_ok=True)
 os.makedirs(os.path.join(args.data_dir, "temp"), exist_ok=True)
 
-# AGENT_SPRITE = imageio.imread("./NuriUtils/assets/maps_topdown_agent_sprite/100x100.png")
-# AGENT_SPRITE = np.ascontiguousarray(np.flipud(AGENT_SPRITE))
-GOAL_FLAG = imageio.imread("./NuriUtils/assets/maps_topdown_flag/flag2_red.png")
-IMG_NODE_FLAG = imageio.imread("./NuriUtils/assets/maps_topdown_node/circle.png")
-OBJ_NODE_FLAG = imageio.imread("./NuriUtils/assets/maps_topdown_node/yellow_circle.png")
-JACKAL_SPRITE = imageio.imread("./NuriUtils/assets/maps_topdown_agent_sprite/jackal.png")
+GOAL_FLAG = imageio.imread("./utils/assets/maps_topdown_flag/flag2_red.png")
+IMG_NODE_FLAG = imageio.imread("./utils/assets/maps_topdown_node/circle.png")
+OBJ_NODE_FLAG = imageio.imread("./utils/assets/maps_topdown_node/yellow_circle.png")
+JACKAL_SPRITE = imageio.imread("./utils/assets/maps_topdown_agent_sprite/jackal.png")
 JACKAL_SPRITE = np.ascontiguousarray(np.flipud(JACKAL_SPRITE))
 initial_jackal_size = JACKAL_SPRITE.shape[0]
 obj_thresh = 0.7
 with open(f"./data/scene_info/{args.dataset}/{args.dataset}_bounds.txt", "rb") as fp:  # Unpickling
     bounds = pickle.load(fp)
 files = list(np.sort(os.listdir(os.path.join(args.data_dir, "video"))))
-# collected_files = list(np.sort(os.listdir(os.path.join(args.data_dir, "output", "gif"))))
 if len(files) > 0:
     files = np.stack(files)
 
@@ -90,30 +87,12 @@ else:
             file_indices.remove(collected_id)
         except:
             pass
-render_configs = {}
-with open(os.path.join("./data/floorplans", f"{args.dataset}_floorplans/render_config.csv")) as csvfile:
-    reader = csv.DictReader(csvfile)
-    for item in reader:
-        if item["level"] == "0":
-            render_configs[item["scanId"]] = {}
-        render_configs[item["scanId"]][item["level"]] = [
-            item["x_low"],
-            item["y_low"],
-            item["z_low"],
-            item["x_high"],
-            item["y_high"],
-            item["z_high"],
-            item["width"],
-            item["height"],
-            item["Projection"]
-        ]
-
+render_configs = joblib.load(os.path.join("./data/floorplans", f"{args.dataset}_floorplans/render_config.pkl"))
 
 def draw_graph(node_image, i, vis_data, vis_features, attn_method="curr", draw_im_graph=True, draw_obj_graph=True, use_detector=False, font_size=2, font_thickness=2,
                im_node_size=10, obj_node_size=10, im_edge_size=3, obj_edge_size=1, rotated=False):
     node_list = vis_data['graph'][i]['global_memory_pose']
     affinity = vis_data['graph'][i]['global_A']
-    # last_localized_imnode = vis_data['graph'][i]['global_idx']
     obj_node_list = vis_data['graph'][i]['object_memory_pose']
     obj_node_category_list = vis_data['graph'][i]['object_memory_category']
     obj_node_score = vis_data['graph'][i]['object_memory_score']
@@ -244,13 +223,11 @@ def draw_graph(node_image, i, vis_data, vis_features, attn_method="curr", draw_i
 
 
 def get_floor(position, scan_name):
-    end_point = np.asarray(position)
-    z = end_point[1]
-    floor = str(np.argmin([abs(float(render_configs[scan_name][i][2]) - z) for i in render_configs[scan_name].keys()]))
+    floor = int(np.argmin([abs(float(render_configs[scan_name][i]['z_low']) - position[1]) for i in render_configs[scan_name].keys()]))
     return floor
 
 
-def get_map_coord(position):
+def get_map_coord(position, lower_bound, upper_bound, imgWidth, imgHeight):
     A = [position[0] - (upper_bound[0] + lower_bound[0]) / 2, position[2] - (upper_bound[2] + lower_bound[2]) / 2, 1, 1]
     grid_x, grid_y = np.array([imgWidth / 2, imgHeight / 2]) * np.matmul(P, A)[:2] + np.array([imgWidth / 2, imgHeight / 2])
     return tuple(np.array([int(grid_y), int(grid_x)]))
@@ -313,15 +290,23 @@ def load_file(file_idx):
     vis_data = joblib.load(data_name)
     vis_features = joblib.load(feat_name)
     scan_name = video_name.split("_")[-4]
-    target_loc = vis_data['map'][0]['target_loc']
     try:
         floor = get_floor(vis_data['position'][-2][0], scan_name)
     except:
         floor = get_floor(vis_data['position'][0][0], scan_name)
-    imgWidth = round(float(render_configs[scan_name][floor][6]))
-    imgHeight = round(float(render_configs[scan_name][floor][7]))
-    P = np.reshape([float(a) for a in "".join(render_configs[scan_name][floor][8].split("(")[1:]).split(")")[0].split(",")], [4, 4])
-    lower_bound = bounds[scan_name][0] #vis_data['map'][0]['lower_bound']
+    P = render_configs[scan_name][floor]['Projection']
+    imgWidth = round(float(render_configs[scan_name][floor]['width']))
+    imgHeight = round(float(render_configs[scan_name][floor]['height']))
+    world_min_width = float(render_configs[scan_name][floor]['x_low'])
+    world_max_width = float(render_configs[scan_name][floor]['x_high'])
+    world_min_height = float(render_configs[scan_name][floor]['y_low'])
+    world_max_height = float(render_configs[scan_name][floor]['y_high'])
+    worldWidth = abs(world_min_width) + abs(world_max_width)
+    worldHeight = abs(world_min_height) + abs(world_max_height)
+    imgWidth = round(float(render_configs[scan_name][floor]['width']))
+    imgHeight = round(float(render_configs[scan_name][floor]['height']))
+
+    lower_bound = bounds[scan_name][0]
     upper_bound = bounds[scan_name][1]
     return vis_data, vis_features, video_name, scan_name, floor, imgWidth, imgHeight, P, lower_bound, upper_bound
 
@@ -335,36 +320,27 @@ def get_polar_angle(ref_rotation=None):
     return np.array(phi) + x_y_flip
 
 
-# legend = cv2.imread('/disk2/nuri/visualize/legend.png')[...,::-1]
-
-if args.dataset.split("_")[0] == "gibson":
-    existing_categories = {}
-    cats = ["skateboard", "bottle", "bowl", "bench", "suitcase", "handbag", "couch", "sports ball", "chair", "bed", "tv", "microwave", "sink", "clock", "dining table", "laptop", "keyboard", "oven", "refrigerator", "vase", "potted plant",
-            "toilet", "cell phone", "book"]
-    for i, name in enumerate(CATEGORIES["gibson"]):
-        if name in cats:
-            existing_categories[name] = tuple(colors_rgb[CATEGORIES[args.dataset.split("_")[0]].index(name)])  # maps.TOP_DOWN_MAP_COLORS[OBJECT_CATEGORY_NODES[name]]  # (int(color[0]), int(color[1]),int(color[2]))
-elif args.dataset == "mp3d":
-    existing_categories = {}
-    # cats = ["skateboard", "bottle", "bowl", "bench", "suitcase", "handbag", "couch", "sports ball", "chair", "bed", "tv", "microwave", "sink", "clock", "dining table", "laptop", "keyboard", "oven", "refrigerator", "vase", "potted plant",
-    #         "toilet", "cell phone", "book"]
-    for i, name in enumerate(CATEGORIES["mp3d"]):
-        # if name in cats:
+existing_categories = {}
+cats = ["skateboard", "bottle", "bowl", "bench", "suitcase", "handbag", "couch", "sports ball", "chair", "bed", "tv",
+        "microwave", "sink", "clock", "dining table", "laptop", "keyboard", "oven", "refrigerator", "vase", "potted plant",
+        "toilet", "cell phone", "book"]
+for i, name in enumerate(CATEGORIES["gibson"]):
+    if name in cats:
         existing_categories[name] = tuple(colors_rgb[CATEGORIES[args.dataset.split("_")[0]].index(name)])  # maps.TOP_DOWN_MAP_COLORS[OBJECT_CATEGORY_NODES[name]]  # (int(color[0]), int(color[1]),int(color[2]))
 
-# file_indices = [33]
 for file_idx in tqdm(file_indices):
     vis_data, vis_features, video_name, scan_name, floor, imgWidth, imgHeight, P, lower_bound, upper_bound = load_file(file_idx)
-    map_name = os.path.join(args.data_dir, "..", "{}_floorplans/out_dir_rgb_png/output_{}_level_{}.0.png".format(args.dataset, scan_name, floor))
+    map_name = os.path.join(project_dir, "..", "{}_floorplans/out_dir_rgb_png/output_{}_level_{}.0.png".format(args.dataset, scan_name, floor))
     ortho_map = cv2.imread(map_name)[..., ::-1][..., :3]
-    map_name = os.path.join(args.data_dir, "..", "{}_floorplans/out_dir_depth_png/output_{}_level_{}.0.png".format(args.dataset, scan_name, floor))
-    ortho_depth = cv2.imread(map_name, 0)
-    ortho_depth = (ortho_depth == ortho_depth[0][0])
-    aa = np.stack(np.where(ortho_depth == 0), 1)
-    ortho_map[ortho_depth == 1] = 255
+    ortho_map = cv2.imread(os.path.join(project_dir, "data/{}_floorplans/rgb/{}_level_{}.png".format(args.dataset, scan_name, floor, args.dataset)))[...,::-1][...,:3]
+    ortho_mask = cv2.imread(os.path.join(project_dir, "data/{}_floorplans/mask/{}_level_{}.png".format(args.dataset, scan_name, floor, args.dataset)), 0)
+    # map_name = os.path.join(args.data_dir, "..", "{}_floorplans/out_dir_depth_png/output_{}_level_{}.0.png".format(args.dataset, scan_name, floor))
+    # ortho_depth = cv2.imread(map_name, 0)
+    aa = np.stack(np.where(ortho_mask == 0), 1)
+    ortho_map[ortho_mask == 1] = 255
     x1, y1 = aa[:, 0].min(), aa[:, 1].min()
     x2, y2 = aa[:, 0].max(), aa[:, 1].max()
-    map_width, map_height = ortho_depth.shape
+    map_width, map_height = ortho_mask.shape
     pixel_per_meter = np.maximum((x2 - x1 + 1) / (upper_bound - lower_bound)[0], (y2 - y1 + 1) / (upper_bound - lower_bound)[2])
     jackal_radius_px = int(pixel_per_meter * 0.2)
     goal_size_px = int(pixel_per_meter * 1.0)
@@ -395,7 +371,7 @@ for file_idx in tqdm(file_indices):
     # GOAL_FLAG
     rotated = False
     video = []
-    fog_of_war_mask = (ortho_depth.astype(np.int32)).copy()[..., None]
+    fog_of_war_mask = (ortho_mask.astype(np.int32)).copy()[..., None]
     for i in tqdm(np.arange(len(vis_data['map']))):
         map_image = ortho_map.copy()
         map_image[ortho_depth] = 255
@@ -403,7 +379,7 @@ for file_idx in tqdm(file_indices):
         gray_image = gray_image[..., None]
         agent_rotation = vis_data['map'][i]['agent_angle']
         agent_loc = np.array(vis_data['map'][i]['agent_loc'])
-        agent_center_coord = get_map_coord(agent_loc)
+        agent_center_coord = get_map_coord(agent_loc, lower_bound, upper_bound, imgWidth, imgHeight)
         map_image = draw_graph(map_image, i, vis_data, vis_features, draw_obj_graph=args.draw_obj_graph, attn_method=args.attn_method,
                                font_size=font_size, font_thickness=font_thickness, im_node_size=im_node_size, obj_node_size=obj_node_size, im_edge_size=im_edge_size, obj_edge_size=obj_edge_size, rotated=rotated)
         # path = np.stack([vis_data['map'][j]['agent_loc'] for j in range(1, len(vis_data['map']))])[:i]

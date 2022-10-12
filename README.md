@@ -78,7 +78,7 @@ habitat-lab
 
 ## Download Data
 
-You can download the data [here](https://drive.google.com/drive/folders/1Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z?usp=sharing).
+You can download the data [here]().
 
 [//]: # (## Demonstration)
 
@@ -109,10 +109,9 @@ Note that the top-down map and pose information are only used for visualization,
     You can find some examples of the collected data in *IL_data/gibson* folder, and look into them with  *show_IL_data.ipynb*.
     You can also download the collected il data from [here]().
 
-2. Collect Graph for Imitation Learning 
+2. Collect Topological Semantic Graph for Imitation Learning 
     ```
     python collect_graph.py ./configs/TSGM.yaml --data-dir IL_data/gibson --record-dir IL_data/gibson_graph --split train --num-procs 16
-    python collect_graph.py ./configs/TSGM.yaml --data-dir IL_data/gibson --record-dir IL_data/gibson_graph --split val --num-procs 16
     ```
     This will generate the graph data for training the TSGM model. (takes around ~3hours)
     You can find some examples of the collected graph data in *IL_data/gibson_graph* folder, and look into them with  *show_graph_data.ipynb*.
@@ -149,25 +148,28 @@ python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard
 ### Results
 Expected results for TSGM from running the code
 
-|  Model  | Easy (SR) | Easy (SPL) | Medium (SR) | Medium (SPL) |  Hard (SR)   | Hard (SPL) | Overall (SR) | Overall (SPL) |
-|:-------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:------------:|:-------------:|
-| TSGM-IL |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |    70.97     |     52.81     |
-| TSGM-RL |    aa     |     aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
+|  Model  |                              Test set                               | Easy (SR) | Easy (SPL) | Medium (SR) | Medium (SPL) |  Hard (SR)   | Hard (SPL) | Overall (SR) | Overall (SPL) |
+|:-------:|:-------------------------------------------------------------------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:------------:|:-------------:|
+| TSGM-IL |      [VGM](https://rllab-snu.github.io/projects/vgm/doc.html)       |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |    70.97     |      52.81    |
+| TSGM-RL |      [VGM](https://rllab-snu.github.io/projects/vgm/doc.html)       |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
+| TSGM-RL |         [NRNS-straight](https://github.com/meera1hahn/NRNS)         |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
+| TSGM-RL |          [NRNS-curved](https://github.com/meera1hahn/NRNS)          |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
+| TSGM-RL |  [Meta](https://github.com/facebookresearch/image-goal-nav-dataset) |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
 
 ### Visualize the Results
 To visualize the TSGM from the recorded output from the evaluate (test with --record 3), please run the following command:
 ```
-python visualize_tsgm.py --config-file configs/tsgm.yaml --scene-id <scene_id> --goal-id <goal_id> --checkpoint-path <checkpoint_path>
+python visualize_tsgm.py --config-file configs/TSGM.yaml --eval-ckpt <checkpoint_path>
 ```
 
 We release pre-trained models from the experiments in our paper:
 
-|      Method       |         Train          |                                                                   Checkpoints                                                                   |
-|:-----------------:|:----------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------:|
-|       TSGM        |   Imitation Learning   |                                                                 [tsgm_il.pth]()                                                                 |
-|       TSGM        | Reinforcement Learning |                                                                 [tsgm_rl.pth]()                                                                 |
-| Image Classifier  |           -            | [Img_encoder.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EfxZ2mghSVpNj6e7mM284jUBQs311Cv1svng7-QJvAd_pw?e=5enmYR) |
-| Object Classifier |           -            | [Obj_encoder.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EdePue0Jxp9NhYAz9-0l5xYB9CHxHYUVfvm0vdKgq8T4ww?e=O497U9) |
+|      Method       |                    Train                    |       Checkpoints       |
+|:-----------------:|:-------------------------------------------:|:-----------------------:|
+|       TSGM        |             Imitation Learning              |     [tsgm_il.pth]()     |
+|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth]()     |
+| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar]() |
+| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar]() |
 
 
 ## Citation
