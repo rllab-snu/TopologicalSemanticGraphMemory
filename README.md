@@ -32,7 +32,7 @@ the success rate and +7.0-23.5% on SPL, which means that the TSGM finds <span  s
 ## Installation
 The source code is developed and tested in the following setting. 
 - Python 3.7
-- pytorch 1.8
+- pytorch 1.10
 - detectron2
 - habitat-sim 0.2.1
 - habitat 0.2.1
@@ -129,7 +129,7 @@ Note that the top-down map and pose information are only used for visualization,
 The reinforcement learning code is highly based on [habitat-lab/habitat_baselines](https://github.com/facebookresearch/habitat-lab/tree/master/habitat_baselines).
 To train the agent with reinforcement learning (PPO), run:
     ```
-    python train_rl.py --policy TSGMPolicy --config configs/TSGM.yaml --version exp_name --diff hard --use-detector --strict-stop --task imggoalnav
+    python train_rl.py --policy TSGMPolicy --config configs/TSGM.yaml --version exp_name --diff hard --use-detector --strict-stop --task imggoalnav --gpu 0,1
     ```
     This will train the agent with the imitation learning model in *./checkpoints/exp_name*.
     The trained model will be saved in *./checkpoints/exp_name*.
@@ -137,13 +137,13 @@ To train the agent with reinforcement learning (PPO), run:
 ## Evaluation
 To evaluate the trained model, run:
 ```
-python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --render --gpu 0
+python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --gpu 0
 ```
 This will evaluate the trained model in *./data/checkpoints/{$version_name}_{$task}*.
 
 Or, you can evaluate the pretrained model with:
 ```
-python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --render --gpu 0 --eval-ckpt ./data/best_ckpts/tsgm_rl.pth
+python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --eval-ckpt ./data/best_ckpts/tsgm_rl.pth --gpu 0
 ```
 
 ### Results
@@ -151,8 +151,8 @@ Expected results for TSGM from running the code
 
 |  Model  | Easy (SR) | Easy (SPL) | Medium (SR) | Medium (SPL) |  Hard (SR)   | Hard (SPL) | Overall (SR)  | Overall (SPL) |
 |:-------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:-------------:|:-------------:|
-| TSGM-IL |    aa     |     aa     |     aa      |      aa      |    63.16     |   45.21    |      aa       |      aa       |
-| TSGM-RL |   aa      |    aa      |    aa       |      aa      |     aa       |     aa      |      aa       |      aa       |
+| TSGM-IL |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |      aa       |      aa       |
+| TSGM-RL |    aa     |     aa     |     aa      |      aa      |     aa       |     aa      |      aa       |      aa       |
 
 ### Visualize the Results
 To visualize the TSGM from the recorded output from the evaluate (test with --record 3), please run the following command:

@@ -270,9 +270,7 @@ class TSGMNet(nn.Module):
         obj_feats = self.obj_fc(torch.cat((obj_context, embeddings['curr_obj_embedding']), -1)).flatten(1)
         rnn_hidden_states_vis, rnn_hidden_states_obj = rnn_hidden_states.split(int(rnn_hidden_states.shape[-1]/2), dim=-1)
 
-        # pred1 = self.pred_aux1(curr_context) #have been
         progress = self.pred_aux2(vis_contexts) #progress
-        # pred3 = self.pred_aux3(curr_obj_context) #have seen
         goal = self.pred_aux4(vis_contexts) #is target
         preds = (progress, goal)
 

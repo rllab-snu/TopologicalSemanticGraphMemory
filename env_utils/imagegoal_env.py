@@ -14,16 +14,12 @@ from habitat.tasks.nav.shortest_path_follower import ShortestPathFollower
 from habitat.sims.habitat_simulator.actions import HabitatSimActions
 import imageio
 import os
-import time
-import pickle
 import quaternion as q
-import NuriUtils.pose as pu
 from habitat.tasks.utils import cartesian_to_polar
 import torch
 import json
 from types import SimpleNamespace
 from NuriUtils.statics import CATEGORIES, COI_INDEX
-from NuriUtils.debug_utils import log_time
 from NuriUtils.ncutils import cam_to_world, get_point_cloud_from_z_panoramic, get_camera_matrix
 from torchvision.ops import roi_align
 from env_utils.noisy_actions import CustomActionSpaceConfiguration
@@ -375,17 +371,7 @@ class ImageGoalEnv(RLEnv):
 
     def step(self, action):
         self._previous_action = action
-        # prev_position = self.get_sim_location()
         obs, reward, done, self.info = super().step(self.action_dict[action])
-        # prev_pose = self.convert_sim_to_ans(self.prev_position, q.as_euler_angles(self.prev_rotation)[1])  # [ax, ay, radi]
-        # curr_pose = self.convert_sim_to_ans(self.current_position, q.as_euler_angles(self.current_rotation)[1])  # [ax, ay, radi]
-        # if self.use_noise_position:
-        #     dx, dy, do = self.get_noisy_pose_change(action, curr_pose, prev_pose) # [ax, ay, radi]
-        #     xx, yy, oo = self.convert_sim_to_ans([self.noise_position[0],self.initial_pose[1], self.noise_position[1]],self.noise_position[2]) # [ax, ay, radi]
-        #     x, y, o = pu.get_new_pose([xx,yy, np.rad2deg(oo)], (dx,dy,do))
-        #     self.noise_position = self.convert_ans_to_sim([x,y,o])
-        # else:
-        #     dx, dy, do = self.get_pose_change(curr_pose, prev_pose)
 
         self.timestep += 1
         self.info['length'] = self.timestep * done
@@ -772,53 +758,13 @@ class ImageGoalEnv(RLEnv):
 
         self._previous_measure = current_measure
         if self._episode_success():
-            reward += self.SUCCESS_REWARD# * self.habitat_env.get_metrics()['spl']
+            reward += self.SUCCESS_REWARD
 
         return reward
 
     def get_dists(self, pose, other_poses):
         dists = np.linalg.norm(np.array(other_poses).reshape(len(other_poses),3) - np.array(pose).reshape(1,3), axis=1)
         return dists
-
-    def convert_sim_to_ans(self, position, euler):
-        x = -position[2]
-        y = -position[0]
-        o = euler
-        if o > np.pi:
-            o -= 2 * np.pi
-        return x, y, o
-
-    def convert_ans_to_sim(self, pose):
-        x,y,o = pose
-        xx = -y
-        yy = -x
-        oo = np.deg2rad(o)
-        if oo > np.pi:
-            oo -= 2 * np.pi
-        return xx, yy, oo
-
-    def get_pose_change(self, curr_pose, prev_pose):
-        """Returns dx, dy, do pose change of the agent relative to the last
-        timestep."""
-        gt_pose_change = pu.get_rel_pose_change(curr_pose, prev_pose)
-        dx_gt, dy_gt, do_gt = gt_pose_change
-        return dx_gt, dy_gt, do_gt
-
-    def get_noisy_pose_change(self, action, curr_pose, prev_pose):
-        gt_pose_change = pu.get_rel_pose_change(curr_pose, prev_pose)
-        dx_gt, dy_gt, do_gt = gt_pose_change
-        if action == 1: ## Forward
-            x_err, y_err, o_err = self.sensor_noise_fwd.sample()[0][0]
-        elif action == 3: ## Right
-            x_err, y_err, o_err = self.sensor_noise_right.sample()[0][0]
-        elif action == 2: ## Left
-            x_err, y_err, o_err = self.sensor_noise_left.sample()[0][0]
-        else: ##Stop
-            x_err, y_err, o_err = 0., 0., 0.
-        x_err = x_err * self.sensor_noise_level
-        y_err = y_err * self.sensor_noise_level
-        o_err = o_err * self.sensor_noise_level
-        return dx_gt + x_err, dy_gt + y_err, do_gt + np.deg2rad(o_err)
 
     def update_objects(self, obs):
         obs['object'] = np.array([[0, 0, obs['panoramic_rgb'].shape[1] - 1, obs['panoramic_rgb'].shape[0] - 1]]).astype(np.float32)
@@ -878,10 +824,8 @@ class ImageGoalEnv(RLEnv):
             obs['object'][:, 3] = obs['object'][:, 3] / obs['panoramic_rgb'].shape[0]
             object_map_pose = []
             for i in range(len(obs['object_pose'])):
-                object_map_pose.append(self.get_sim_location_with_poserot(obs['object_pose'][i],
-                                                                          q.from_float_array(self._env._current_episode.start_rotation)))
-            obs['object_map_pose'] = np.stack(
-                object_map_pose)  # np.array(np.stack([-bb[:, 2], bb[:, 0]], 1), dtype=np.float32)
+                object_map_pose.append(self.get_sim_location_with_poserot(obs['object_pose'][i], q.from_float_array(self._env._current_episode.start_rotation)))
+            obs['object_map_pose'] = np.stack(object_map_pose)  # np.array(np.stack([-bb[:, 2], bb[:, 0]], 1), dtype=np.float32)
             obs['object_seg'] = np.ones_like(obs['panoramic_rgb'][...,0])*(-1)
         else:
             obs['object'] = np.array([[0, 0, 1., 1.]]).astype(np.float32)
