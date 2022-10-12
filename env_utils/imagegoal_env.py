@@ -138,19 +138,11 @@ class ImageGoalEnv(RLEnv):
             self.mapper.loose_check = True
             self.mapper.height_th = 0.5
         if self.config.USE_AUXILIARY_INFO:
-            self.return_have_been = True
-            self.return_target_dist_score = True
             obs_dict.update({
-                'have_been': Box(low=0, high=1, shape=(1,), dtype=np.int32),
-                'have_seen': Box(low=0, high=1, shape=(self.config.memory.num_objects,), dtype=np.int32),
-                'is_obj_target': Box(low=0, high=1, shape=(self.config.memory.num_objects,), dtype=np.int32),
-                'is_img_target': Box(low=0, high=1, shape=(1,), dtype=np.int32),
-                'target_dist_score': Box(low=0, high=1, shape=(1,), dtype=np.float32),
+                'is_goal': Box(low=0, high=1, shape=(1,), dtype=np.int32),
                 'progress': Box(low=0, high=1, shape=(1,), dtype=np.float32),
+                'target_dist_score': Box(low=0, high=1, shape=(1,), dtype=np.float32),
             })
-        else:
-            self.return_have_been = False
-            self.return_target_dist_score = False
         self.observation_space = SpaceDict(obs_dict)
 
         self.gradual_diff = getattr(config,'gradual_diff',False)
@@ -419,17 +411,17 @@ class ImageGoalEnv(RLEnv):
         obs_dict['target_goal'] = self.habitat_env.target_obs['target_goal'][self.curr_goal_idx]
         obs.update(self.habitat_env.target_obs)
 
-        if self.timestep == 0:
-            have_been = False
-        else:
-            if len(self.positions) < 10:
-                have_been = False
-            else:
-                dists = np.linalg.norm(np.array(self.positions) - np.expand_dims(np.array(self.current_position), 0), axis=1)
-                far = np.where(dists > 1.0)[0]
-                near = np.where(dists[:-10] < 1.0)[0]
-                have_been = len(far) > 0 and len(near) > 0 and (near < far.max()).any()
-        obs_dict['have_been'] = np.array(have_been).astype(np.float32).reshape(1)
+        # if self.timestep == 0:
+        #     have_been = False
+        # else:
+        #     if len(self.positions) < 10:
+        #         have_been = False
+        #     else:
+        #         dists = np.linalg.norm(np.array(self.positions) - np.expand_dims(np.array(self.current_position), 0), axis=1)
+        #         far = np.where(dists > 1.0)[0]
+        #         near = np.where(dists[:-10] < 1.0)[0]
+        #         have_been = len(far) > 0 and len(near) > 0 and (near < far.max()).any()
+        # obs_dict['have_been'] = np.array(have_been).astype(np.float32).reshape(1)
         obs_dict['distance'] = self.curr_distance
         target_dist_score = np.maximum(1 - np.array(obs_dict['distance']) / 2., 0.0)
         obs_dict['target_dist_score'] = np.array(target_dist_score).astype(np.float32).reshape(1)
@@ -474,25 +466,9 @@ class ImageGoalEnv(RLEnv):
         obs_dict['object_score'] = object_score_out
         obs_dict['object_id'] = object_id_out
         obs_dict['target_object_pose'] = self._env._current_episode.goals[self.curr_goal_idx].position
-        obs_dict['is_img_target'] = np.array([int(self.curr_distance < 1.0)])
-
-        obs_dict['is_obj_target'] = np.zeros(max_num_object)
-        is_target = np.any(np.linalg.norm(obs_dict['target_object_pose'] - obs_dict['object_pose'][obs_dict['object_mask']==1][:, None], axis=-1) < 0.2, -1)
-        obs_dict['is_obj_target'][:len(is_target)] = np.array(is_target).astype(np.float32)
-        obs_dict['have_seen'] = np.zeros(max_num_object)
-        have_seen = np.zeros(len(obs_dict['object_map_pose'][obs_dict['object_mask'] == 1]))
-        if len(self.object_positions) > 100:
-            dists = np.linalg.norm(np.array(self.object_positions[-100:])[None][...,:2] - np.array(obs_dict['object_map_pose'][obs_dict['object_mask'] == 1])[:, None][...,:2], axis=-1)
-            for i in range(len(have_seen)):
-                is_same = (dists[i].min(-1) < 0.2) & (self.object_categories == obs_dict['object_category'][obs_dict['object_mask'] == 1][i])
-                if is_same.any():
-                    have_seen[i] = 1
-        obs_dict['have_seen'][:len(have_seen)] = np.array(have_seen).astype(np.float32)
-        self.object_positions.extend(obs_dict['object_map_pose'][obs_dict['object_mask'] == 1])
-        self.object_categories.extend(obs_dict['object_category'][obs_dict['object_mask'] == 1])
+        obs_dict['is_goal'] = np.array([int(self.curr_distance < 1.0)])
 
         max_num_object = self.config.memory.num_objects
-
         target_loc_object = np.zeros((max_num_object, 5))
         target_loc_object_category_out = np.zeros((max_num_object))
         target_loc_object_mask_out = np.zeros((max_num_object))
@@ -541,17 +517,17 @@ class ImageGoalEnv(RLEnv):
         obs_dict["map_pose"] = self.get_sim_location_with_poserot(obs_dict['position'], q.from_float_array(obs_dict['rotation']))
         obs.update(self.habitat_env.target_obs)
 
-        if self.timestep == 0:
-            have_been = False
-        else:
-            if len(self.positions) < 10:
-                have_been = False
-            else:
-                dists = np.linalg.norm(np.array(self.positions) - np.expand_dims(np.array(self.current_position), 0), axis=1)
-                far = np.where(dists > 1.0)[0]
-                near = np.where(dists[:-10] < 1.0)[0]
-                have_been = len(far) > 0 and len(near) > 0 and (near < far.max()).any()
-        obs_dict['have_been'] = np.array(have_been).astype(np.float32).reshape(1)
+        # if self.timestep == 0:
+        #     have_been = False
+        # else:
+        #     if len(self.positions) < 10:
+        #         have_been = False
+        #     else:
+        #         dists = np.linalg.norm(np.array(self.positions) - np.expand_dims(np.array(self.current_position), 0), axis=1)
+        #         far = np.where(dists > 1.0)[0]
+        #         near = np.where(dists[:-10] < 1.0)[0]
+        #         have_been = len(far) > 0 and len(near) > 0 and (near < far.max()).any()
+        # obs_dict['have_been'] = np.array(have_been).astype(np.float32).reshape(1)
         obs_dict['distance'] = self.curr_distance
         target_dist_score = np.maximum(1 - np.array(obs_dict['distance']) / 2., 0.0)
         obs_dict['target_dist_score'] = np.array(target_dist_score).astype(np.float32).reshape(1)
@@ -565,25 +541,13 @@ class ImageGoalEnv(RLEnv):
                          "start_rotation": self._env._current_episode.start_rotation})
         obs = self.update_objects(obs)
         obs_dict.update(obs)
-        self.detected_object_category = [CATEGORIES[self.dn][i] for i in obs['object_category']]
-        self.detected_object_score = obs['object_score'].copy()
-        self.detected_object_distance = obs['object_depth'].copy()
-        self.detected_object_position = obs['object_pose'].copy()
+        # self.detected_object_category = [CATEGORIES[self.dn][i] for i in obs['object_category']]
+        # self.detected_object_score = obs['object_score'].copy()
+        # self.detected_object_distance = obs['object_depth'].copy()
+        # self.detected_object_position = obs['object_pose'].copy()
         if ("train" not in self.args.mode or self.render_map or self.record):
             obs_dict['object_seg'] = obs['object_seg'].copy()
         obs_dict['target_object_pose'] = self._env._current_episode.goals[self.curr_goal_idx].position
-        is_target = np.any(np.linalg.norm(obs_dict['target_object_pose'] - obs_dict['object_pose'][:, None], axis=-1) < 0.2, -1)
-        obs_dict['is_obj_target'] = np.array(is_target).astype(np.float32)
-        have_seen = np.zeros(len(obs_dict['object_map_pose']))
-        if len(self.object_positions) > 100:
-            dists = np.linalg.norm(np.array(self.object_positions[-100:])[None][...,:2] - np.array(obs_dict['object_map_pose'])[:, None][...,:2], axis=-1)
-            for i in range(len(have_seen)):
-                is_same = (dists[i].min(-1) < 0.2) & (self.object_categories == obs_dict['object_category'][i])
-                if is_same.any():
-                    have_seen[i] = 1
-        obs_dict['have_seen'] = np.array(have_seen).astype(np.float32)
-        self.object_positions.extend(obs_dict['object_map_pose'])
-        self.object_categories.extend(obs_dict['object_category'])
         return obs_dict
 
     def get_sim_location(self):
@@ -713,8 +677,6 @@ class ImageGoalEnv(RLEnv):
         if self.has_log_info is not None:
             if self.has_log_info['type'] == 'str':
                 txt += ' ' + self.has_log_info['info']
-        elif self.return_have_been:
-            txt += '                                 '
         if hasattr(self.mapper, 'node_list'):
             if self.mapper.node_list is None:
                 txt += ' node : NNNN'

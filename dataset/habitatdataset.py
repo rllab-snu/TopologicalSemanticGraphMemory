@@ -21,17 +21,6 @@ from habitat_sim.sensors.noise_models.redwood_depth_noise_model import (
 )
 TIME_DEBUG = False
 
-def get_haveseen(all_object_positions, all_object_categories, object_pose, object_category):
-    have_seen = np.zeros(len(object_pose))
-    if len(all_object_positions) > 0:
-        dists = np.linalg.norm(np.array(all_object_positions)[None] - np.array(object_pose)[:, None], axis=-1)
-        for i in range(len(object_pose)):
-            is_same = (dists[i].min(-1) < 0.2) & (all_object_categories == object_category[i])
-            if is_same.any():
-                have_seen[i] = 1
-    have_seen = np.array(have_seen).astype(np.float32)
-    return have_seen
-
 class ILDataset(data.Dataset):
     def __init__(self, cfg, data_list, transform):
         self.data_list = data_list
@@ -80,7 +69,7 @@ class ILDataset(data.Dataset):
         if TIME_DEBUG : s, get_step_t = log_time(s, 'load data', return_time=True)
         scene = self.data_list[index].split('/')[-1].split('_')[0]
         target_indices = np.array(input_data['target_idx'])
-        aux_info = {'have_been': None, 'distance': None, 'have_seen': None}
+        aux_info = {'is_goal': None, 'distance': None, 'progress': None}
 
         orig_data_len = len(input_data['position'])
         start_idx = np.random.randint(orig_data_len - 10) if orig_data_len > 10 else 0
@@ -116,7 +105,6 @@ class ILDataset(data.Dataset):
         input_act_out[:input_length] = input_act -1 if self.action_dim == 3 else input_act
 
         max_num_object = self.config.memory.num_objects
-        have_seen = np.zeros([self.max_input_length, max_num_object])
         input_object = input_data['object'][start_idx:start_idx + input_length]
         if 'object_id' in input_data:
             input_object_id = input_data['object_id'][start_idx:start_idx + input_length]
@@ -172,13 +160,6 @@ class ILDataset(data.Dataset):
                     if 'object_pose' in input_data:
                         input_object_pose_out[i, :min(max_num_object, num_object_t)] = input_object_pose_t[:min(max_num_object, num_object_t)]
                     input_object_mask_out[i, :min(max_num_object, num_object_t)] = 1
-
-                if i > 10:
-                    have_seen_i = get_haveseen(np.concatenate([input_object_pose_out[i_] for i_ in range(i)]), np.concatenate([input_object_category_out[i_] for i_ in range(i)]), input_object_pose_out[i],
-                                             input_object_category_out[i])
-                    have_seen[i] = have_seen_i
-                    # dists = np.linalg.norm(input_object_pose_out[i][:,None] - np.concatenate([input_object_pose_out[i_] for i_ in range(i)])[None], axis=-1)
-                    # have_seen[i, dists.min(-1) < 0.2] = 1
 
         targets = np.zeros([self.max_input_length])
         targets[:input_length] = target_indices[start_idx:start_idx+input_length]
@@ -306,22 +287,22 @@ class ILDataset(data.Dataset):
         vis_rotations = np.zeros([self.max_input_length, 4])
         vis_rotations[:input_length] = np.stack(input_data['rotation'][start_idx:start_idx+input_length])
 
-        have_been = np.zeros([self.max_input_length])
-        pp = input_data['position'][start_idx:end_idx][:input_length]
-        for idx, pos_t in enumerate(pp):
-            if idx == 0:
-                have_been[idx] = 0
-            else:
-                dists = np.linalg.norm(pp[:idx] - pos_t, axis=1)
-                if len(dists) > 10:
-                    far = np.where(dists > 1.0)[0]
-                    near = np.where(dists[:-10] < 1.0)[0]
-                    if len(far) > 0 and len(near) > 0 and (near < far.max()).any():
-                        have_been[idx] = 1
-                    else:
-                        have_been[idx] = 0
-                else:
-                    have_been[idx] = 0
+        # have_been = np.zeros([self.max_input_length])
+        # pp = input_data['position'][start_idx:end_idx][:input_length]
+        # for idx, pos_t in enumerate(pp):
+        #     if idx == 0:
+        #         have_been[idx] = 0
+        #     else:
+        #         dists = np.linalg.norm(pp[:idx] - pos_t, axis=1)
+        #         if len(dists) > 10:
+        #             far = np.where(dists > 1.0)[0]
+        #             near = np.where(dists[:-10] < 1.0)[0]
+        #             if len(far) > 0 and len(near) > 0 and (near < far.max()).any():
+        #                 have_been[idx] = 1
+        #             else:
+        #                 have_been[idx] = 0
+        #         else:
+        #             have_been[idx] = 0
 
         aux_info['distance'] = np.zeros([self.max_input_length])
         distances = np.stack(input_data['distance'][start_idx:start_idx+input_length])
@@ -335,7 +316,7 @@ class ILDataset(data.Dataset):
                 epi_idx += 1
             max_length.append(episode_length[epi_idx])
         progress = np.clip(1 - np.array(np.stack(input_data['distance'])/np.stack(max_length))[start_idx:start_idx+input_length],0,1)
-        is_img_target = np.stack(input_data['distance'])[start_idx:start_idx+input_length] < 1
+        is_goal = np.stack(input_data['distance'])[start_idx:start_idx+input_length] < 1
 
         train_info = {}
         train_info["panoramic_rgb"] = torch.from_numpy(input_rgb_out).float()
@@ -370,14 +351,10 @@ class ILDataset(data.Dataset):
         train_info["target_loc_object_pose"] = torch.from_numpy(target_loc_object_pose_out[targets.astype(np.int32)]).float()
         train_info["target_loc_object_id"] = torch.from_numpy(target_loc_object_id_out[targets.astype(np.int32)]).float()
         train_info["scene"] = scene
-        is_target = np.stack([(target_object_id_out[targets.astype(np.int32)][i] == input_object_id_out[i]).astype(np.float32) for i in range(input_object_id_out.shape[0])])
         aux_info['progress'] = np.zeros([self.max_input_length])
         aux_info['progress'][:input_length] = torch.from_numpy(progress).float()
-        aux_info['have_been'] = torch.from_numpy(have_been).float()
-        aux_info['have_seen'] = torch.from_numpy(have_seen).float()
-        aux_info['is_obj_target'] = torch.from_numpy(is_target).float()
-        aux_info['is_img_target'] = np.zeros([self.max_input_length])
-        aux_info['is_img_target'][:input_length] = torch.from_numpy(is_img_target).float()
+        aux_info['is_goal'] = np.zeros([self.max_input_length])
+        aux_info['is_goal'][:input_length] = torch.from_numpy(is_goal).float()
 
         vis_info = {}
         vis_info["target_position"] = target_pose_out
@@ -388,7 +365,7 @@ class ILDataset(data.Dataset):
         vis_info["len_data"] = len(input_data['position'][start_idx:start_idx+input_length])
         vis_info["input_image"] = input_rgb_out
         vis_info["target_goal"] = target_img_orig_out[targets.astype(np.int32)]
-        vis_info["have_been"] = aux_info['have_been']
+        # vis_info["have_been"] = aux_info['have_been']
         vis_info["progress"] = aux_info['progress']
 
         if self.config.TASK_CONFIG.TASK.TASK_NAME == "ImgGoal" and train_info['target_loc_object'].sum() == 0:

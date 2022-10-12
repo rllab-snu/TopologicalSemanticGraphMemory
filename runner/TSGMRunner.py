@@ -78,25 +78,17 @@ class TSGMRunner(BaseRunner):
         )
         self.features = act_features
         if preds[0] is not None:
-            have_been = torch.sigmoid(preds[0][0])
-            have_been_str = 'have_been: '
-            have_been_str += '%.3f '%(have_been.item())
-        else: have_been_str = ''
+            progress = torch.sigmoid(preds[0][0])
+            progress_str = 'progress: '
+            progress_str += '%.3f '%(progress.item())
+        else: progress_str = ''
         if preds[1] is not None:
-            pred_target_distance = torch.sigmoid(preds[1][0])
-            pred_dist_str = 'pred_prog: '
-            pred_dist_str += '%.3f '%(pred_target_distance.item())
-        else: pred_dist_str = ''
-        try:
-            if preds[3] is not None:
-                is_target = torch.max(torch.sigmoid(preds[3][0]))
-                is_target_str = 'pred_target: '
-                is_target_str += '%.3f '%(is_target.item())
-            else: is_target_str = ''
-        except:
-            is_target_str = ''
+            pred_goal = torch.sigmoid(preds[1][0])
+            pred_goal_str = 'pred_goal: '
+            pred_goal_str += '%.3f '%(pred_goal_str.item())
+        else: pred_goal_str = ''
 
-        log_str = have_been_str + ' ' + pred_dist_str +  ' ' + is_target_str# + ' ' + have_seen_str +  ' ' + is_target_str
+        log_str = progress_str + ' ' + pred_goal_str
         self.env.log_info(log_type='str', info=log_str)
         self.hidden_states = hidden_states
         self.actions = actions

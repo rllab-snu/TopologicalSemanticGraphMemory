@@ -44,8 +44,7 @@ class ImgGoalTrainer(nn.Module):
         if train_info.get('target_loc_object', None) != None:
             for i in range(len(train_info['target_loc_object'])):
                 train_info['target_loc_object'][i, :, :, 0] = i
-        aux_info = {'have_been': aux_info['have_been'].to(self.torch_device), 'progress': aux_info['progress'].to(self.torch_device),
-                    'have_seen': aux_info['have_seen'].to(self.torch_device), 'is_obj_target': aux_info['is_obj_target'].to(self.torch_device), 'is_img_target': aux_info['is_img_target'].to(self.torch_device)}
+        aux_info = {'is_goal': aux_info['is_goal'].to(self.torch_device), 'progress': aux_info['progress'].to(self.torch_device)}
         self.B = train_info['action'].shape[0]
         lengths = (train_info['action'] > -10).sum(dim=1)
 
@@ -59,21 +58,16 @@ class ImgGoalTrainer(nn.Module):
         with torch.no_grad(): #batch x T x []
             gt_action = Variable(train_info['action'][:, :T])
             valid_indices = gt_action.long() != -100
-            valid_obj_indices = (train_info['object_mask'][:, :T].long() != 0) * (valid_indices[...,None])
-            gt_have_been = Variable(aux_info['have_been'][:, :T])
             gt_progress = Variable(aux_info['progress'][:, :T])
-            gt_have_seen = Variable(aux_info['have_seen'][:, :T])
-            gt_is_img_target = Variable(aux_info['is_img_target'][:, :T])
+            gt_is_goal = Variable(aux_info['is_goal'][:, :T])
 
         graphs = []
         for data_path in train_info['data_path']:
             file_name = os.path.join(self.graph_dir, split, data_path.split('/')[-1])
             graphs.append(joblib.load(file_name)['graph'])
         actions_logits_all = []
-        have_been_pred = []
         progress_pred = []
-        have_seen_pred = []
-        is_img_target_pred = []
+        goal_pred = []
         for t in range(T):
             masks = lengths > t
             if t == 0: masks[:] = False
@@ -109,15 +103,15 @@ class ImgGoalTrainer(nn.Module):
             )
             actions_logits_all.append(actions_logits)
             progress_pred.append(preds[0].squeeze(-1))
-            is_img_target_pred.append(preds[1].squeeze(-1))
+            goal_pred.append(preds[1].squeeze(-1))
         actions_logits_all = torch.stack(actions_logits_all, 1)
         progress_pred = torch.stack(progress_pred, 1)
-        is_img_target_pred = torch.stack(is_img_target_pred, 1)
+        goal_pred = torch.stack(goal_pred, 1)
 
         action_loss = F.cross_entropy(actions_logits_all.reshape(-1,actions_logits_all.shape[-1]), gt_action.reshape(-1).long())
         progress_loss = F.mse_loss(torch.sigmoid(progress_pred)[valid_indices].reshape(-1), gt_progress[valid_indices].reshape(-1).float())
-        goal_loss = F.mse_loss(torch.sigmoid(is_img_target_pred)[valid_indices].reshape(-1), gt_is_img_target[valid_indices].reshape(-1).float())
-        total_loss = action_loss + progress_loss + goal_loss
+        goal_loss = F.mse_loss(torch.sigmoid(goal_pred)[valid_indices].reshape(-1), gt_is_goal[valid_indices].reshape(-1).float())
+        total_loss = action_loss + goal_loss + progress_loss
 
         if train:
             self.optim.zero_grad()
@@ -126,8 +120,6 @@ class ImgGoalTrainer(nn.Module):
 
         loss_dict = {}
         loss_dict['act_loss'] = action_loss.item()
-        loss_dict['have_been'] = aux_loss1.item()
-        loss_dict['progress'] = aux_loss2.item()
-        loss_dict['have_seen'] = aux_loss3.item()
-        loss_dict['is_target'] = aux_loss4.item()
+        loss_dict['progress'] = aux_loss1.item()
+        loss_dict['is_goal'] = aux_loss2.item()
         return results, loss_dict

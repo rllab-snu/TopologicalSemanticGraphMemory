@@ -21,7 +21,7 @@ NUM_VAL_PROCESSES: 0
 SENSORS: ["DEPTH_SENSOR", "RGB_SENSOR", "SEMANTIC_SENSOR"]
 
 OBS_TO_SAVE: ['panoramic_rgb', 'panoramic_depth','goal_embedding', 'episode_info', 'target_goal',
-              'step', 'have_been', 'gt_action', 'progress']
+              'step', 'is_goal', 'gt_action', 'progress']
 POLICY: ''
 WRAPPER: "EnvWrapper"
 REWARD_METHOD: 'progress'

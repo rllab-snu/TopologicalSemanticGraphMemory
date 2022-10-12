@@ -209,10 +209,8 @@ def train():
                     wandb_run.log(
                         {
                             'act_loss': loss_summary_dict['act_loss'][0],
-                            "havebeen_loss":  loss_summary_dict['have_been'][0],
                             "progress_loss":  loss_summary_dict['progress'][0],
-                            "haveseen_loss":  loss_summary_dict['have_seen'][0],
-                            "target_loss":  loss_summary_dict['is_target'][0],
+                            "goal_loss":  loss_summary_dict['is_goal'][0],
                             "lr": lr,
                         },
                         step=step

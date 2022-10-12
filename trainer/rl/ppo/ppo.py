@@ -141,8 +141,8 @@ class PPO(nn.Module):
                     progress_loss = F.mse_loss(torch.sigmoid(progress), obs_batch['progress'].float())
                     total_loss += progress_loss
                     progress_loss_epoch += progress_loss.item()
-                if 'is_img_target' in obs_batch: #goal sensor
-                    goal_loss = F.mse_loss(torch.sigmoid(istarget).reshape(-1), obs_batch['is_img_target'].reshape(-1).float())
+                if 'is_goal' in obs_batch: #goal sensor
+                    goal_loss = F.mse_loss(torch.sigmoid(istarget).reshape(-1), obs_batch['is_goal'].reshape(-1).float())
                     total_loss += goal_loss
                     goal_loss_epoch += goal_loss.item()
 

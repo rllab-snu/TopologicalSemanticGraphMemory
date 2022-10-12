@@ -32,7 +32,7 @@ from model.policy import *
 
 
 @baseline_registry.register_trainer(name="custom_ppo_memory")
-class PPOTrainer_Memory(BaseRLTrainer):
+class PPOTrainer(BaseRLTrainer):
     r"""Trainer class for PPO algorithm
     Paper: https://arxiv.org/abs/1707.06347.
     """
@@ -248,7 +248,7 @@ class PPOTrainer_Memory(BaseRLTrainer):
         """
         return torch.load(checkpoint_path, *args, **kwargs)
 
-    METRICS_BLACKLIST = {"top_down_map", "collisions.is_collision", 'episode', 'step', 'goal_index.num_goals', 'goal_index.curr_goal_index', 'gt_pose', 'ortho_map', 'ortho_map.agent_rot', 'ortho_map.agent_loc'}
+    METRICS_BLACKLIST = {"top_down_map", "collisions.is_collision", 'episode', 'step', 'goal_index.num_goals', 'goal_index.curr_goal_index', 'gt_pose'}
 
     @classmethod
     def _extract_scalars_from_info(
@@ -327,21 +327,18 @@ class PPOTrainer_Memory(BaseRLTrainer):
         t_step_env = time.time()
         if preds is not None:
             pred1, pred2 = preds
-            have_been = torch.sigmoid(pred1[:,:]).detach().cpu().numpy().tolist() if pred1 is not None else None
-            pred_target_distance = torch.sigmoid(pred2[:,:]).detach().cpu().numpy().tolist() if pred2 is not None else None
+            pred_progress = torch.sigmoid(pred1[:,:]).detach().cpu().numpy().tolist() if pred1 is not None else None
+            pred_goal = torch.sigmoid(pred2[:,:]).detach().cpu().numpy().tolist() if pred2 is not None else None
 
             log_strs = []
             for i in range(len(actions)):
-                hb = have_been[i] if have_been is not None else None
-                ptd = pred_target_distance[i] if pred_target_distance is not None else None
+                pp = pred_progress[i] if pred_progress is not None else None
+                pg = pred_goal[i] if pred_goal is not None else None
                 log_str = ''
-                if hb is not None:
-                    log_str += 'have_been: ' + ' '.join(['%.3f'%hb_ag for hb_ag in hb]) + ' '
-                if ptd is not None:
-                    try:
-                        log_str += 'pred_progress: ' + ' '.join([('%.3f'*self.num_goals)%tuple(pd_ag) for pd_ag in ptd]) + ' '
-                    except:
-                        log_str += 'pred_progress: ' + ' '.join(['%.3f'%hb_ag for hb_ag in ptd]) + ' '
+                if pp is not None:
+                    log_str += 'pred_progress: ' + ' '.join(['%.3f'%pp_ag for pp_ag in pp]) + ' '
+                if pg is not None:
+                    log_str += 'pred_goal: ' + ' '.join(['%.3f'%hb_ag for hb_ag in pg]) + ' '
                 log_strs.append(log_str)
             self.envs.call(['log_info']*self.num_processes,[{'log_type':'str', 'info':log_strs[i]} for i in range(self.num_processes)])
 
@@ -471,7 +468,7 @@ class PPOTrainer_Memory(BaseRLTrainer):
                       ['obj_memory_feat', 'obj_memory_category', 'obj_memory_mask', 'obj_memory_A_OV', 'obj_memory_time']
         targ_object_list = ['target_loc_object', 'target_loc_object_category', 'target_loc_object_mask', 'target_loc_object_score']
         curr_object_list = ['object', 'object_category', 'object_mask', 'object_score']
-        aux_list = ['have_been', 'have_seen', 'is_img_target', 'is_obj_target']
+        aux_list = ['is_goal', 'progress']
         OBS_LIST = self.config.OBS_TO_SAVE + memory_list + targ_object_list + curr_object_list + aux_list + ['img_memory_idx', 'target_goal']
         self.num_processes = num_train_processes
         rollouts = RolloutStorage(
@@ -570,7 +567,6 @@ class PPOTrainer_Memory(BaseRLTrainer):
                 aux_losses
             ) = self._update_agent(ppo_cfg, rollouts)
             self.num_updates_done += 1
-            # self.envs.call(['set_update']*self.num_processes,[{'num_update':self.num_updates_done} for i in range(self.num_processes)])
 
             pth_time += delta_pth_time
             rollouts.after_update()
@@ -599,9 +595,6 @@ class PPOTrainer_Memory(BaseRLTrainer):
                         "action_loss": action_loss,
                         "havebeen_loss": aux_losses[0],
                         "progress_loss": aux_losses[1],
-                        "have_seen_loss": aux_losses[2],
-                        "is_target_loss": aux_losses[3],
-                        # "gt_action_loss": gt_act_loss,
                         "dist_entropy": dist_entropy,
                         "success rate": deltas["success"] / deltas["count"],
                         "SPL": deltas["spl"] / deltas["count"],
@@ -611,7 +604,6 @@ class PPOTrainer_Memory(BaseRLTrainer):
                         "update_step": self.num_updates_done,
                         "fps": (self.num_steps_done - start_steps) / (time.time() - t_start),
                         "collisions": deltas["collisions.count"] / deltas["count"],
-                        # "episode_id": self.envs.episode_id()[0],
                     },
                     step=self.num_updates_done
                 )

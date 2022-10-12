@@ -1,4 +1,4 @@
 from .ppo import PPO
-from .ppo_trainer_memory import PPOTrainer_Memory
+from .ppo_trainer import PPOTrainer
 
-__all__ = [ "PPOTrainer_Memory"]
+__all__ = ["PPOTrainer"]
