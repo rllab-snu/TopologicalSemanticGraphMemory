@@ -54,7 +54,7 @@ RL:
   PPO:
     num_mini_batch: 2
     num_steps: 64
-    pretrained_weights: "./data/best_ckpts/tsgm_il_v2.pth"
+    pretrained_weights: "./data/best_ckpts/tsgm_il.pth"
     rl_pretrained: False
     il_pretrained: True
     pretrained_encoder: False

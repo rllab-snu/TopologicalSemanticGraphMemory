@@ -149,10 +149,10 @@ python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard
 ### Results
 Expected results for TSGM from running the code
 
-|  Model  | Easy (SR) | Easy (SPL) | Medium (SR) | Medium (SPL) |  Hard (SR)   | Hard (SPL) | Overall (SR)  | Overall (SPL) |
-|:-------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:-------------:|:-------------:|
-| TSGM-IL |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |      aa       |      aa       |
-| TSGM-RL |    aa     |     aa     |     aa      |      aa      |     aa       |     aa      |      aa       |      aa       |
+|  Model  | Easy (SR) | Easy (SPL) | Medium (SR) | Medium (SPL) |  Hard (SR)   | Hard (SPL) | Overall (SR) | Overall (SPL) |
+|:-------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:------------:|:-------------:|
+| TSGM-IL |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |    70.97     |     52.81     |
+| TSGM-RL |    aa     |     aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
 
 ### Visualize the Results
 To visualize the TSGM from the recorded output from the evaluate (test with --record 3), please run the following command:
