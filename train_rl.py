@@ -168,11 +168,11 @@ def run_exp(config: str, opts=None, *args, **kwargs) -> None:
     if len(arguments.gpu) > 1:
         config.TORCH_GPU_ID = int(arguments.gpu[0])
         config.SIMULATOR_GPU_ID = int(arguments.gpu[1])
-        config.TASK_CONFIG.SIMULATOR_GPU_ID = int(arguments.gpu[1])
+        config.TASK_CONFIG.DETECTOR_GPU_ID = int(arguments.gpu[1])
     else:
         config.TORCH_GPU_ID = int(arguments.gpu[0])
         config.SIMULATOR_GPU_ID = int(arguments.gpu[0])
-        config.TASK_CONFIG.SIMULATOR_GPU_ID = int(arguments.gpu[1])
+        config.TASK_CONFIG.DETECTOR_GPU_ID = int(arguments.gpu[0])
     config.freeze()
     np.random.seed(config.TASK_CONFIG.SEED)
     random.seed(config.TASK_CONFIG.SEED)

@@ -156,8 +156,7 @@ def evaluate(eval_config, state_dict, ckpt_config):
         ckpt_config.WRAPPER = eval_config.WRAPPER
         ckpt_config.REWARD_METHOD = eval_config.REWARD_METHOD
         ckpt_config.ENV_NAME = eval_config.ENV_NAME
-        ckpt_config.TORCH_GPU_ID = args.gpu
-        ckpt_config.SIMULATOR_GPU_ID = args.gpu
+
         for k, v in eval_config.items():
             if k not in ckpt_config:
                 ckpt_config.update({k:v})
@@ -177,6 +176,15 @@ def evaluate(eval_config, state_dict, ckpt_config):
     eval_config.memory.num_objects = args.num_object
     eval_config.OBJECTGRAPH.SPARSE = False
     eval_config.features.object_category_num = 80
+    eval_config.gpu = args.gpu.split(',')
+    if len(args.gpu) > 1:
+        eval_config.TORCH_GPU_ID = int(args.gpu[0])
+        eval_config.SIMULATOR_GPU_ID = int(args.gpu[1])
+        eval_config.TASK_CONFIG.DETECTOR_GPU_ID = int(args.gpu[1])
+    else:
+        eval_config.TORCH_GPU_ID = int(args.gpu[0])
+        eval_config.SIMULATOR_GPU_ID = int(args.gpu[0])
+        eval_config.TASK_CONFIG.DETECTOR_GPU_ID = int(args.gpu[0])
     eval_config.TASK_CONFIG['ARGS'] = vars(args)
     eval_config['ARGS'] = vars(args)
     eval_config.freeze()
