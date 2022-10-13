@@ -28,6 +28,18 @@ input to find an action to the target.<br>
 On the task of an image goal navigation, TSGM significantly outperforms competitive baselines by +5.0-9.0% on
 the success rate and +7.0-23.5% on SPL, which means that the TSGM finds <span  style="font-style: italic">efficient</span> paths.
 
+## Demonstration
+
+To visualize the TSGM generation, run the jupyter notebook [build_tsgm_demo](demo/build_tsgm_demo.ipython).
+This notebook will show the online TSGM generation during *w/a/s/d control* on the simulator.
+The rendering window will show the generated TSGM and the observations as follows:
+![tsgm_demo_topdownmap](demo/tsgm_demo_topdownmap.gif)
+![tsgm_demo_obs](demo/tsgm_demo_obs.gif)
+
+Note that the top-down map and pose information are only used for visualization, not for the graph generation. 
+
+To check the effectiveness of the object encoder, run the jupyter notebook [object_encoder](demo/object_encoder.ipython).
+
 ## Installation
 The source code is developed and tested in the following setting. 
 - Python 3.7
@@ -79,17 +91,6 @@ habitat-lab
 
 You can download the data [here]().
 
-## Demonstration
-
-To visualize the TSGM generation, run the jupyter notebook [build_tsgm_demo](demo/build_tsgm_demo.ipython).
-This notebook will show the online TSGM generation during *w/a/s/d control* on the simulator.
-The rendering window will show the generated TSGM and the observations as follows:
-![tsgm_demo_topdownmap](demo/tsgm_demo_topdownmap.gif)
-![tsgm_demo_obs](demo/tsgm_demo_obs.gif)
-
-Note that the top-down map and pose information are only used for visualization, not for the graph generation. 
-
-To check the effectiveness of the object encoder, run the jupyter notebook [object_encoder](demo/object_encoder.ipython).
 
 ## Creating Datasets
 1. Data Generation for Imitation Learning 
