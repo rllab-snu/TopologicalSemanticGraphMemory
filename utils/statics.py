@@ -31,7 +31,7 @@ with open(os.path.join(os.path.dirname(__file__), "data/gibson_category_selected
 COI = [line.rstrip() for line in lines]
 
 COI_INDEX = {}
-# COI = CATEGORIES['gibson']
+COI = CATEGORIES['gibson']
 COI_INDEX['gibson'] = np.where([c in COI for c in CATEGORIES['gibson']])[0]
 
 ALL_CATEGORIES = list(set(CATEGORIES['gibson'] + DETECTION_CATEGORIES))
