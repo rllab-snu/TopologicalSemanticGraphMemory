@@ -26,9 +26,9 @@ with open(os.path.join(os.path.dirname(__file__), "data/gibson_testset.txt"), "r
 GIBSON_TINY_TEST_SCENE = [line.rstrip() for line in lines]
 
 
-with open(os.path.join(os.path.dirname(__file__), "data/gibson_category_selected.txt"), "r") as f:
+with open(os.path.join(os.path.dirname(__file__), "data/mp3d_category_selected.txt"), "r") as f:
     lines = f.readlines()
-COI = [line.rstrip() for line in lines]
+COI_mp3d = [line.rstrip() for line in lines]
 
 COI_INDEX = {}
 COI = CATEGORIES['gibson']
