@@ -8,8 +8,6 @@ Seoul National University
 
 Project website: [https://bareblackfoot.github.io/TopologicalSemanticGraphMemory](https://bareblackfoot.github.io/TopologicalSemanticGraphMemory/)
 
-![Demo](readme-img/tsgm_corl_2022.gif)
-
 ## Abstract
 This work proposes an approach to incrementally collect a landmark-based semantic graph memory and use the
 collected memory for image goal navigation.
@@ -81,25 +79,17 @@ habitat-lab
 
 You can download the data [here]().
 
-[//]: # (## Demonstration)
+## Demonstration
 
-[//]: # (To visualize the TSGM generation, run:)
-
-[//]: # (```)
-
-[//]: # (python tsgm_demo.py --gpu 0 --num-proc 2)
-
-[//]: # (```)
-
-[//]: # (This command will show the online TSGM generation during *random exploration*.)
-
-[//]: # (The rendering window will show the generated TSGM and the observations as follows:)
-
-[//]: # ()
-[//]: # (![tsgm_demo_1]&#40;readme-img/tsgm_demo_1.gif&#41; ![tsgm_demo_2]&#40;readme-img/tsgm_demo_2.gif&#41;)
+To visualize the TSGM generation, run the jupyter notebook [build_tsgm_demo](demo/build_tsgm_demo.ipython).
+This notebook will show the online TSGM generation during *w/a/s/d control* on the simulator.
+The rendering window will show the generated TSGM and the observations as follows:
+![tsgm_demo_topdownmap](demo/tsgm_demo_topdownmap.gif)
+![tsgm_demo_obs](demo/tsgm_demo_obs.gif)
 
 Note that the top-down map and pose information are only used for visualization, not for the graph generation. 
 
+To check the effectiveness of the object encoder, run the jupyter notebook [object_encoder](demo/object_encoder.ipython).
 
 ## Creating Datasets
 1. Data Generation for Imitation Learning 
