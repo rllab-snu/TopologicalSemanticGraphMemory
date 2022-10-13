@@ -33,9 +33,8 @@ the success rate and +7.0-23.5% on SPL, which means that the TSGM finds <span  s
 To visualize the TSGM generation, run the jupyter notebook [build_tsgm_demo](demo/build_tsgm_demo.ipython).
 This notebook will show the online TSGM generation during *w/a/s/d control* on the simulator.
 The rendering window will show the generated TSGM and the observations as follows:
-![tsgm_demo_topdownmap](demo/tsgm_demo_topdownmap.gif)
 ![tsgm_demo_obs](demo/tsgm_demo_obs.gif)
-
+![tsgm_demo_topdownmap](demo/tsgm_demo_topdownmap.gif)
 Note that the top-down map and pose information are only used for visualization, not for the graph generation. 
 
 To check the effectiveness of the object encoder, run the jupyter notebook [object_encoder](demo/object_encoder.ipython).
