@@ -12,4 +12,4 @@ dependencies:
   - scikit-image=0.19.2
   - scikit-learn=1.0.2
   - pandas
-prefix: /home/blackfoot/anaconda3/envs/tsgm
+prefix: ~/anaconda3/envs/tsgm

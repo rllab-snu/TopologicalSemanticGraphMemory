@@ -1,6 +1,7 @@
 # TSGM: Topological Semantic Graph Memory
 
 This repository contains a Pytorch implementation of our CoRL 2022 **<span style="color: rgb(255, 95, 0)">oral</span>** paper:
+
 ###*[Topological Semantic Graph Memory for Image Goal Navigation](https://arxiv.org/pdf/2209.08274.pdf)* <br>
 Nuri Kim, Obin Kwon, Hwiyeon Yoo, Yunho Choi, Jeongho Park, Songhwai Oh <br>
 Seoul National University
