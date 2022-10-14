@@ -450,25 +450,3 @@ def draw_bbox(rgb: np.ndarray, bboxes: np.ndarray, bbox_category = [], use_detec
             imgHeight, imgWidth, _ = rgb.shape
             cv2.putText(rgb, label, (int(bbox[0]), int(bbox[1]) + 10), 0, 5e-3 * imgHeight, (255,255,0), 1)
     return rgb
-
-#
-# def concat_horizontal(img1, img2):
-#     img1_shape = img1.shape
-#     img2_shape = img2.shape
-#     if img1_shape[0] > img2_shape[0]:
-#         img2 = cv2.resize(img2, ( int(img2_shape[1] / img2_shape[0] * img1_shape[0]), img1_shape[0]))
-#         # img2 = cv2.resize(img2, (img1_shape[0], img2_shape[1]))
-#     elif img1_shape[0] < img2_shape[0]:
-#         img1 = cv2.resize(img1, ( int(img1_shape[1] / img1_shape[0] * img2_shape[0]), img2_shape[0]))
-#     return np.concatenate((img1, img2), axis=1)
-#
-#
-# def concat_vertical(img1, img2):
-#     img1_shape = img1.shape
-#     img2_shape = img2.shape
-#     if img1_shape[1] > img2_shape[1]:
-#         img2 = cv2.resize(img2, (img1_shape[1], int(img2_shape[0] / img2_shape[1] * img1_shape[1])))
-#     elif img1_shape[1] < img2_shape[1]:
-#         img1 = cv2.resize(img1, (img2_shape[1], int(img1_shape[0] / img1_shape[1] * img2_shape[1])))
-#     return np.concatenate((img1, img2), axis=0)
-#
