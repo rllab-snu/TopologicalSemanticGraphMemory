@@ -177,8 +177,8 @@ class PPOTrainer(BaseRLTrainer):
                     self.pth_time = resume_state['extra_state']['pth_time']
                 if "env_time" in resume_state['extra_state']:
                     self.env_time = resume_state['extra_state']['env_time']
-                if "update" in resume_state['extra_state']:
-                    self.num_updates_done = resume_state['extra_state']['update']
+                if "num_updates_done" in resume_state['extra_state']:
+                    self.num_updates_done = resume_state['extra_state']['num_updates_done']
                 self.count_checkpoints = int(self.args.resume.split("/")[-1].split(".")[1])
             except:
                 self.actor_critic.load_state_dict(
