@@ -45,9 +45,6 @@ def clip_map_birdseye_view(image, clip_size, pixel_pose):
         print('image shape ', image.shape, 'min_x', min_x,'max_x', max_x,'min_y',min_y,'max_y',max_y, 'return_image.shape',return_image.shape, 'cliped', cliped_image.shape, 'start_x,y', start_x, start_y)
     return return_image
 
-#python train_il.py --run-type eval --gpu 7 --exp-config IL_configs/gmt.yaml --resume data/eval/GMT_fix_90.pt --version-name GMT_FIX
-# python train_il.py --run-type eval --exp-config IL_configs/gmt.yaml --gpu 8 --data-dir /disk4/obin/imggoal_demo_gibson/train/ --stop --version-name 0725_gmt_goalemb --diff hard --resume data/eval/GMT_goalemb_85.pt
-
 
 def append_text_to_image(image: np.ndarray, text: str, font_size=0.5, font_line=cv2.LINE_AA):
     r""" Appends text underneath an image of size (height, width, channels).
@@ -150,11 +147,6 @@ def observations_to_image(observation, info: Dict, mode='panoramic', local_imgs=
         egocentric_view.append(rgb)
         if not isinstance(rgb, np.ndarray):
             rgb = rgb.cpu().numpy()
-            if "objectgoal" in observation:
-                goal_rgb = (observation['objectgoal'][:, :, :3] * 255)
-                if not isinstance(goal_rgb, np.ndarray):
-                    goal_rgb = goal_rgb.cpu().numpy()
-                egocentric_view.append(goal_rgb.astype(np.uint8))
             if "target_goal" in observation:
                 goal_rgb = (observation['target_goal'][:, :, :3] * 255)
                 if not isinstance(goal_rgb, np.ndarray):
@@ -213,12 +205,6 @@ def observations_to_image(observation, info: Dict, mode='panoramic', local_imgs=
                     agent_rotation=info["custom_top_down_map"]["agent_angle"],
                     agent_radius_px=20,
                 )
-                # if 'lidar_map' in info:
-                #     for point in info['lidar_map']:
-                #         top_down_map = maps.draw_point(
-                #             image=top_down_map,
-                #             map_pose=(point[0], point[1])
-                #         )
             try:
                 map_height_min = np.maximum(map_agent_pos[1]-200, 0)
                 map_height_max = np.minimum(map_agent_pos[1]+200, top_down_map.shape[1])
@@ -249,40 +235,6 @@ def observations_to_image(observation, info: Dict, mode='panoramic', local_imgs=
         frame = np.concatenate((frame, top_down_map, local_top_down_map), axis=1)
 
     return frame
-
-def get_rot(x, y):
-    """
-    Inputs:
-    x: rotations
-    y: target rotation
-    Output:
-    rot: relative rotation in radian where "turn right: plus"
-                                           "turn left: minus"
-    """
-    x_shape = x.shape[:2]
-    # y_shape = y.shape[:2]
-    x = q.from_float_array(x.cpu()).reshape(-1)
-    phi_x = []
-    phi_y = []
-    for x_ in x:
-        heading_vector = quaternion_rotate_vector(x_.inverse(), np.array([0, 0, -1]))
-        phi_x.append(cartesian_to_polar(-heading_vector[2], heading_vector[0])[1])
-    phi_x = np.stack(phi_x).reshape(x_shape)
-    y = q.from_float_array(y.cpu()).reshape(-1)
-    for y_ in y:
-        heading_vector = quaternion_rotate_vector(y_.inverse(), np.array([0, 0, -1]))
-        phi_y.append(cartesian_to_polar(-heading_vector[2], heading_vector[0])[1])
-    phi_y = np.stack(phi_y)[:,None]
-
-    rot = phi_y - phi_x
-    # set -np.pi < rot < np.pi
-    rot[rot > np.pi] = rot[rot > np.pi] - 2 * np.pi
-    rot[rot <-np.pi] = rot[rot <-np.pi] + 2 * np.pi
-    # set -1 < rot < 1
-    rot = rot / np.pi
-    return rot
-
-
 
 def _to_tensor(v):
     if torch.is_tensor(v):

@@ -488,31 +488,16 @@ class Env:
                 depth = depth.squeeze(-1)
                 box_world = np.stack([self.object_loc[bbox_id] for bbox_id in bbox_ids])
                 box_pix_xs, box_pix_ys = ((bboxes[:, 0])).astype(np.int32), ((bboxes[:, 1])).astype(np.int32)
-                # T_world_camera = self.get_cameraT(box_pix_xs)
                 box_depth = np.stack([depth[box_pix_y, box_pix_x] for box_pix_x, box_pix_y in zip(box_pix_xs, box_pix_ys)])
-                # rx, ry = (box_pix_xs - self.cam_width / 2.) / (self.cam_width / 2.), (self.img_height / 2. - box_pix_ys) / (self.img_height / 2.)
-                # xys = np.array([rx * box_depth, ry * box_depth, -box_depth, np.ones_like(box_depth)])
-                # box_world_min = np.stack([np.matmul(T_world_camera[i], xys[:, i]) for i in range(xys.shape[1])])[:, 1]
-
-                # box_pix_xs, box_pix_ys = ((bboxes[:, 2])).astype(np.int32), ((bboxes[:, 3])).astype(np.int32)
-                # T_world_camera = self.get_cameraT(box_pix_xs)
-                # box_depth = np.stack([depth[box_pix_y, box_pix_x] for box_pix_x, box_pix_y in zip(box_pix_xs, box_pix_ys)])
-                # rx, ry = (box_pix_xs - self.cam_width / 2.) / (self.cam_width / 2.), (self.img_height / 2. - box_pix_ys) / (self.img_height / 2.)
-                # xys = np.array([rx * box_depth, ry * box_depth, -box_depth, np.ones_like(box_depth)])
-                # box_world_max = np.stack([np.matmul(T_world_camera[i], xys[:, i]) for i in range(xys.shape[1])])[:, 1]
             else:
-                box_depth = np.ones([len(bboxes)]) * 100. #np.array([100.])
-                box_world = np.ones([len(bboxes), 3]) * (-100) #np.array([-100., 3])
-                # box_world_min = np.ones(len(bboxes)) * 100
-                # box_world_max = np.ones(len(bboxes)) * 100
+                box_depth = np.ones([len(bboxes)]) * 100.
+                box_world = np.ones([len(bboxes), 3]) * (-100)
         else:
             bboxes = np.array([[0, 0, self.img_width-1, self.img_height-1]]).astype(np.float32)
             box_categories = np.array([0])
             bbox_ids = np.array([0])
             box_depth = np.array([0.])
             box_world = np.array([-100., -100., -100.])
-            # box_world_min = np.array([100.])
-            # box_world_max = np.array([100.])
         return bboxes, box_categories, bbox_ids, box_world, 1. / (box_depth + 0.001), box_depth
 
     def get_cameraT(self, xs):
@@ -722,7 +707,7 @@ class Env:
         self._task.measurements.reset_measures(
             episode=current_episode, task=self.task, obs=observations, position=self._sim.get_agent(0).get_state().position, dataset=self.dn
         )
-        self.target_obs['target_goal'] = observations['target_goal'][..., :4]
+        self.target_obs['target_goal'] = observations['target_goal']#[..., :4]
 
         return observations
 
@@ -776,7 +761,7 @@ class Env:
         current_episode.curr_goal_idx = self.curr_goal_idx
         observations['target_idx'] = self.curr_goal_idx
         # observations['target_goal'] = observations['target_goal'][..., :4]
-        self.target_obs['target_goal'] = observations['target_goal'][..., :4]
+        self.target_obs['target_goal'] = observations['target_goal']#[..., :4]
         self._task.measurements.update_measures(
             episode=current_episode, action=action, task=self.task, obs=observations, position=self._sim.get_agent(0).get_state().position, dataset=self.dn
         )

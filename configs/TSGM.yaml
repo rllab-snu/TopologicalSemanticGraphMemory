@@ -56,7 +56,7 @@ RL:
     num_steps: 64
     pretrained_weights: "./data/best_ckpts/tsgm_il.pth"
     rl_pretrained: False
-    il_pretrained: True
+    il_pretrained: False
     pretrained_encoder: False
     train_encoder: True
     reset_critic: False

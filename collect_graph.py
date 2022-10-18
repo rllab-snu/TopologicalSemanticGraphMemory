@@ -45,7 +45,7 @@ def collect_graph(data_list):
     data_list = [data_list] if type(data_list) is not list else data_list
     config = collect_config(args)
     env = eval(config.ENV_NAME)(config)
-    graph_dir = os.path.join(args.record_dir, 'graph', args.split)
+    graph_dir = os.path.join(args.record_dir, 'graph_v3', args.split)
     with torch.no_grad():
         for data_path in data_list:
             batch = pull_image(data_path, config)
@@ -179,8 +179,8 @@ if __name__=='__main__':
     print('Object Graph Threshold: ', config.TASK_CONFIG.obj_node_th)
     print('====================================')
 
-    os.makedirs(os.path.join(args.record_dir, 'graph'), exist_ok=True)
-    graph_dir = os.path.join(args.record_dir, 'graph', args.split)
+    os.makedirs(os.path.join(args.record_dir, 'graph_v3'), exist_ok=True)
+    graph_dir = os.path.join(args.record_dir, 'graph_v3', args.split)
     os.makedirs(graph_dir, exist_ok=True)
     existing_files = glob.glob(graph_dir + "/*")
 

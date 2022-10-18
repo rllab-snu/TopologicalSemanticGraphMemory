@@ -4,13 +4,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-try:
-    from habitat.datasets.object_nav.object_nav_dataset import (
-        ObjectNavDatasetV1,
-    )
-except ImportError:
-    pass
-
 from habitat.tasks.nav.object_nav_task import ObjectGoalNavEpisode, ObjectGoal
 
 import os
@@ -25,7 +18,6 @@ from habitat.core.dataset import Dataset
 from habitat.core.logging import logger
 from habitat.core.registry import registry
 from habitat.core.simulator import AgentState, Sensor, SensorTypes, RGBSensor, DepthSensor, SemanticSensor
-# from habitat.sims.habitat_simulator.habitat_simulator import overwrite_config, HabitatSimSensor
 from habitat.core.dataset import Dataset, Episode
 from habitat.core.utils import not_none_validator
 from typing import Dict, List, Optional, Tuple
@@ -38,53 +30,17 @@ from habitat.tasks.nav.nav import (
     TopDownMap,
 )
 
-
-from habitat.tasks.nav.nav import (
-    merge_sim_episode_config,
-    EpisodicGPSSensor
-)
+#
+# from habitat.tasks.nav.nav import (
+#     merge_sim_episode_config,
+#     EpisodicGPSSensor
+# )
 
 import quaternion as q
-import time
 import torch
-# def make_panoramic(left, front, right, torch_tensor=False):
-#     if not torch_tensor: return np.concatenate([left, front, right],1)[:,1:-1]
-#     else: return torch.cat((left, front, right),1)[:,1:-1]
 import habitat_sim
 import magnum as mn
-import cv2
-# import copy
 
-task_cat2mpcat40 = [
-    3,  # ('chair', 2, 0)
-    5,  # ('table', 4, 1)
-    6,  # ('picture', 5, 2)
-    7,  # ('cabinet', 6, 3)
-    8,  # ('cushion', 7, 4)
-    10,  # ('sofa', 9, 5),
-    11,  # ('bed', 10, 6)
-    13,  # ('chest_of_drawers', 12, 7),
-    14,  # ('plant', 13, 8)
-    15,  # ('sink', 14, 9)
-    18,  # ('toilet', 17, 10),
-    19,  # ('stool', 18, 11),
-    20,  # ('towel', 19, 12)
-    22,  # ('tv_monitor', 21, 13)
-    23,  # ('shower', 22, 14)
-    25,  # ('bathtub', 24, 15)
-    26,  # ('counter', 25, 16),
-    27,  # ('fireplace', 26, 17),
-    33,  # ('gym_equipment', 32, 18),
-    34,  # ('seating', 33, 19),
-    38,  # ('clothes', 37, 20),
-    43,  # ('foodstuff', 42, 21),
-    44,  # ('stationery', 43, 22),
-    45,  # ('fruit', 44, 23),
-    46,  # ('plaything', 45, 24),
-    47,  # ('hand_tool', 46, 25),
-    48,  # ('game_equipment', 47, 26),
-    49,  # ('kitchenware', 48, 27)
-]
 @registry.register_sensor(name="EquirectRGBSensor")
 class EquirectRGBSensor(RGBSensor):
     def __init__(self, config, **kwargs: Any):
@@ -342,7 +298,6 @@ class PanoramicRGBSensor(Sensor):
         self.config = config
         self.torch = False #config.HABITAT_SIM_V0.GPU_GPU
         self.num_camera = config.NUM_CAMERA
-        # self.sensor_subtype = habitat_sim.SensorSubType.PINHOLE
         self.sim_sensor_type = habitat_sim.SensorType.COLOR
         self.sim_sensor_subtype = habitat_sim.SensorSubType.PINHOLE
         super().__init__(config=config)
@@ -375,22 +330,13 @@ class PanoramicRGBSensor(Sensor):
             left = rgb_array.shape[1] - self.config.HEIGHT*4
             slice = left//2
             rgb_array = rgb_array[:,slice:slice+self.config.HEIGHT*4]
-        # if kwargs['dataset'] == "ideafactory" or kwargs['dataset'] == "rllab133":
-        # rgb_array = cv2.cvtColor(rgb_array, cv2.COLOR_BGR2HSV)
-        # increase = 40
-        # v = rgb_array[:, :, 2]
-        # v = np.where(v <= 255 - increase, v + increase, 255)
-        # rgb_array[:, :, 2] = v
-        # rgb_array = cv2.cvtColor(rgb_array, cv2.COLOR_HSV2BGR)
         return rgb_array
-        #return make_panoramic(observations['rgb_left'],observations['rgb'],observations['rgb_right'], self.torch)
 
 @registry.register_sensor(name="PanoramicDepthSensor")
 class PanoramicDepthSensor(DepthSensor):
     def __init__(self, config, **kwargs: Any):
         self.sim_sensor_type = habitat_sim.SensorType.DEPTH
         self.sim_sensor_subtype = habitat_sim.SensorSubType.PINHOLE
-        #self.agent_id = config.AGENT_ID
         if config.NORMALIZE_DEPTH: self.depth_range = [0,1]
         else: self.depth_range = [config.MIN_DEPTH, config.MAX_DEPTH]
         self.min_depth_value = config.MIN_DEPTH
@@ -538,22 +484,10 @@ class CustomImgGoalSensor(Sensor):
                     left = depth_array.shape[1] - self.height*4
                     slice = left // 2
                     depth_array = depth_array[:, slice:slice + self.height*4]
-                if 'semantic_0' in obs.keys():
-                    semantic_list = [obs['semantic_%d' % (i)] for i in range(self.num_camera)]
-                    if isinstance(obs['semantic_0'], torch.Tensor):
-                        semantic_array = torch.cat(semantic_list, 1)
-                    else:
-                        semantic_array = np.concatenate(semantic_list, 1)
-                    if semantic_array.shape[1] > self.height*4:
-                        left = semantic_array.shape[1] - self.height*4
-                        slice = left // 2
-                        semantic_array = semantic_array[:, slice:slice + self.height*4]
                 if isinstance(obs['depth_0'], torch.Tensor):
                     goal_obs = torch.cat([rgb_array, depth_array],2)
                 else:
                     goal_obs = np.concatenate([rgb_array, depth_array],2)
-                if 'semantic_0' in obs.keys():
-                    goal_obs = np.concatenate([goal_obs, semantic_array[:,:,None]],2)
                 self.goal_obs.append(goal_obs)
                 self.goal_pose.append([position, rotation.components])
             if len(episode.goals) >= 1:
@@ -561,15 +495,6 @@ class CustomImgGoalSensor(Sensor):
                     self.goal_obs = torch.stack(self.goal_obs,0)
                 else:
                     self.goal_obs = np.array(self.goal_obs)
-            # if episode.scene_id.split("/")[-2] == "rllab133" or episode.scene_id.split("/")[-2] == "ideafactory":
-            #     aa = self.goal_obs.copy()
-            #     rgb_array = cv2.cvtColor((aa[0, ...,:3]*255).astype(np.uint8), cv2.COLOR_BGR2HSV)
-            #     increase = 40
-            #     v = rgb_array[:, :, 2]
-            #     v = np.where(v <= 255 - increase, v + increase, 255)
-            #     rgb_array[:, :, 2] = v
-            #     rgb_array = cv2.cvtColor(rgb_array, cv2.COLOR_HSV2BGR)
-            #     self.goal_obs[0,...,:3] = rgb_array / 255.
         return self.goal_obs
 
 
@@ -605,73 +530,6 @@ class Success_woSTOP(Success):
 
         if (
            distance_to_target < self._config.SUCCESS_DISTANCE
-        ):
-            self._metric = 1.0
-        else:
-            self._metric = 0.0
-
-
-@registry.register_measure(name='Success_obj')
-class Success_obj(Success):
-    r"""Whether or not the agent succeeded at its task
-
-    This measure depends on DistanceToGoal measure.
-    """
-    cls_uuid: str = "success"
-
-    def update_metric(
-        self, *args: Any, episode, task: EmbodiedTask, **kwargs: Any
-    ):
-        distance_to_target = task.measurements.measures[
-            DistanceToGoal.cls_uuid
-        ].get_metric()
-
-        target_id = int(kwargs['obs']['target_object_id'][kwargs['obs']['target_idx']][0])
-        object_loc = episode.goals[kwargs['obs']['target_idx']].object_position
-        goal_loc = episode.goals[kwargs['obs']['target_idx']].position
-        target_to_object = np.sqrt((object_loc[2] - goal_loc[2]) ** 2 + (object_loc[0] - goal_loc[0]) ** 2)
-        cur_loc = kwargs['position']
-        cur_to_object = np.sqrt((object_loc[2] - cur_loc[2]) ** 2 + (object_loc[0] - cur_loc[0]) ** 2)
-        size_object = np.sum(kwargs['obs']['panoramic_semantic'] == target_id)
-        aa = kwargs['obs']['target_object'][kwargs['obs']['target_idx']]
-        obj_size = (aa[3] - aa[1]) * (aa[2] - aa[0]) * 0.5
-
-        if (
-            hasattr(task, "is_stop_called")
-            and task.is_stop_called  # type: ignore
-            and ((size_object > obj_size) or ((distance_to_target < self._config.SUCCESS_DISTANCE + target_to_object) & (cur_to_object < self._config.SUCCESS_DISTANCE)))
-        ):
-            self._metric = 1.0
-        else:
-            self._metric = 0.0
-
-@registry.register_measure(name='Success_obj_woSTOP')
-class Success_obj(Success):
-    r"""Whether or not the agent succeeded at its task
-
-    This measure depends on DistanceToGoal measure.
-    """
-    cls_uuid: str = "success"
-
-    def update_metric(
-        self, *args: Any, episode, task: EmbodiedTask, **kwargs: Any
-    ):
-        distance_to_target = task.measurements.measures[
-            DistanceToGoal.cls_uuid
-        ].get_metric()
-
-        target_id = int(kwargs['obs']['target_object_id'][kwargs['obs']['target_idx']][0])
-        object_loc = episode.goals[kwargs['obs']['target_idx']].object_position
-        goal_loc = episode.goals[kwargs['obs']['target_idx']].position
-        target_to_object = np.sqrt((object_loc[2] - goal_loc[2]) ** 2 + (object_loc[0] - goal_loc[0]) ** 2)
-        cur_loc = kwargs['position']
-        cur_to_object = np.sqrt((object_loc[2] - cur_loc[2]) ** 2 + (object_loc[0] - cur_loc[0]) ** 2)
-        size_object = np.sum(kwargs['obs']['panoramic_semantic'] == target_id)
-        aa = kwargs['obs']['target_object'][kwargs['obs']['target_idx']]
-        obj_size = (aa[3] - aa[1]) * (aa[2] - aa[0]) * 0.5
-
-        if (
-                ((size_object > obj_size) or ((distance_to_target < self._config.SUCCESS_DISTANCE + target_to_object) & (cur_to_object < self._config.SUCCESS_DISTANCE)))
         ):
             self._metric = 1.0
         else:

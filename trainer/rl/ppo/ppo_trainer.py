@@ -181,17 +181,18 @@ class PPOTrainer(BaseRLTrainer):
                     self.num_updates_done = resume_state['extra_state']['num_updates_done']
                 self.count_checkpoints = int(self.args.resume.split("/")[-1].split(".")[1])
             except:
+                print("Error on resuming, it is a il pretrained checkpoint, not rl pretrained checkpoint")
                 self.actor_critic.load_state_dict(
                     {
                         k[len("actor_critic."):]: v
                         for k, v in resume_state.items()
                     }
                 )
-                self.resume_steps = 0 #resume_state['extra_state']['step']
-                self.pth_time = 0 #resume_state['extra_state']['pth_time']
-                self.env_time = 0 #resume_state['extra_state']['env_time']
-                self.num_updates_done = 0 #resume_state['extra_state']['update']
-                self.count_checkpoints = 0 #int(self.args.resume.split("/")[-1].split(".")[1])
+                self.resume_steps = 0
+                self.pth_time = 0
+                self.env_time = 0
+                self.num_updates_done = 0
+                self.count_checkpoints = 0
 
         if not ppo_cfg.train_encoder:
             self._static_encoder = True
