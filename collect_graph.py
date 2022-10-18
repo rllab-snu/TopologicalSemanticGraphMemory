@@ -18,14 +18,14 @@ parser.add_argument("--split", choices=['val', 'train', 'min_val'], default='tra
 parser.add_argument('--record', choices=['0','1','2','3'], default='0') # 0: no record 1: env.render 2: pose + action numerical traj 3: features
 parser.add_argument('--img-node-th', type=str, default='0.75')
 parser.add_argument('--obj-node-th', type=str, default='0.8')
-parser.add_argument('--obj-score-th', default=0.1, type=float)
+parser.add_argument('--obj-score-th', default=0.3, type=float)
 parser.add_argument('--dataset', default='gibson', type=str)
 parser.add_argument('--task', default='imggoalnav', type=str)
 parser.add_argument('--project-dir', default='.', type=str)
 parser.add_argument('--render', action='store_true', default=False)
 parser.add_argument('--policy', default='TSGMPolicy', type=str)
 parser.add_argument('--mode', default='collect_graph', type=str)
-parser.add_argument('--data-dir', default='IL_data/gibson_noisy', type=str)
+parser.add_argument('--data-dir', default='IL_data/gibson_fd', type=str)
 parser.add_argument('--record-dir', type=str, default='data')
 parser.add_argument('--num-procs', default=16, type=int)
 
@@ -48,7 +48,7 @@ def collect_graph(data_list):
     graph_dir = os.path.join(args.record_dir, 'graph', args.split)
     with torch.no_grad():
         for data_path in data_list:
-            batch = pull_image(data_path, config)
+            batch = pull_image(data_path[0], config)
             record_graphs = []
             for t in range(batch['panoramic_rgb'].shape[0]):
                 obs_t = {
@@ -122,6 +122,13 @@ def pull_image(data_path, config):
             input_object_score_t = np.array(input_object_score_t[keep]).reshape(-1)
             input_object_category_t = np.array(input_object_category[i]).reshape(-1)[keep].reshape(-1)
             input_object_pose_t = np.array(input_object_pose[i][keep]).reshape(-1, 3)
+
+            score_mask = input_object_score_t > args.obj_score_th
+            input_object_t = input_object_t[score_mask]
+            input_object_score_t = input_object_score_t[score_mask]
+            input_object_category_t = input_object_category_t[score_mask]
+            input_object_pose_t = input_object_pose_t[score_mask]
+
             num_object_t = len(input_object_t)
 
             input_object_out[i, :min(max_num_object, num_object_t), 1:] = input_object_t[:min(max_num_object, num_object_t), :4]
@@ -192,4 +199,5 @@ if __name__=='__main__':
                 data_list.remove(ef)
     num_data = len(data_list)
     data_list = np.stack(sorted(data_list))
-    parmap.map(collect_graph, data_list, pm_processes = args.num_procs)
+    collect_graph(data_list)
+    # parmap.map(collect_graph, data_list, pm_processes = args.num_procs)
