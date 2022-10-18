@@ -8,9 +8,11 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 from env_utils.imagegoal_env import ImageGoalEnv
-from model.Graph.resnet_img import resnet18 as resnet18_img
+# from model.Graph.resnet_img import resnet18 as resnet18_img
+from torchvision.models import resnet18 as resnet18_img
 from model.Graph.resnet_obj import resnet18 as resnet18_obj
-from env_utils.env_wrapper.graph import ImgGraph, ObjGraph
+from model.Graph.graph import ImgGraph, ObjGraph
+from model.Graph.graph_update import update_image_graph, update_object_graph
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -74,19 +76,28 @@ class ImageGoalGraphEnv(ImageGoalEnv):
         img_encoder = resnet18_img(num_classes=feature_dim)
         dim_mlp = img_encoder.fc.weight.shape[1]
         img_encoder.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), img_encoder.fc)
-        ckpt_pth = os.path.join(project_dir, 'data/graph', 'Img_encoder.pth.tar')
+        ckpt_pth = os.path.join(project_dir, 'data/graph', self.dn, 'Img_encoder.pth.tar')
         ckpt = torch.load(ckpt_pth, map_location='cpu')
-        img_encoder.load_state_dict(ckpt)
+        state_dict = {k[len('module.encoder_q.'):]: v for k, v in ckpt['state_dict'].items() if 'module.encoder_q.' in k}
+        img_encoder.load_state_dict(state_dict)
         img_encoder.eval().to(self.torch_device)
+
+        # img_encoder = resnet18_img(num_classes=feature_dim)
+        # dim_mlp = img_encoder.fc.weight.shape[1]
+        # img_encoder.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), img_encoder.fc)
+        # ckpt_pth = os.path.join(project_dir, 'data/graph', self.dn, 'Img_encoder.pth.tar')
+        # ckpt = torch.load(ckpt_pth, map_location='cpu')
+        # img_encoder.load_state_dict(ckpt)
+        # img_encoder.eval().to(self.torch_device)
         return img_encoder
 
     def load_obj_encoder(self, feature_dim):
         obj_encoder = resnet18_obj(num_classes=feature_dim)
         dim_mlp = obj_encoder.fc.weight.shape[1]
         obj_encoder.fc = nn.Sequential(nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), obj_encoder.fc)
-        ckpt_pth = os.path.join(project_dir, 'data/graph', f'Obj_encoder.pth.tar')
+        ckpt_pth = os.path.join(project_dir, 'data/graph', self.dn, f'Obj_encoder.pth.tar')
         ckpt = torch.load(ckpt_pth, map_location='cpu')
-        state_dict = {k[len('module.encoder_k.'):]: v for k, v in ckpt['state_dict'].items() if 'module.encoder_k.' in k}
+        state_dict = {k[len('module.encoder_q.'):]: v for k, v in ckpt['state_dict'].items() if 'module.encoder_q.' in k}
         obj_encoder.load_state_dict(state_dict)
         obj_encoder.eval().to(self.torch_device)
         return obj_encoder
@@ -102,151 +113,150 @@ class ImageGoalGraphEnv(ImageGoalEnv):
             return close, logits
         else:
             return close
-
-    def update_object_graph(self, object_embedding, obs, done):
-        object_score, object_category, object_mask, object_position, object_bboxes, time = \
-            obs['object_score'], obs['object_category'], obs['object_mask'], obs['object_pose'], obs['object'], obs['step']
-        # The position is only used for visualizations. Remove if object features are similar
-        # object masking
-        object_score = object_score[object_mask==1]
-        object_category = object_category[object_mask==1]
-        object_position = object_position[object_mask==1]
-        object_embedding = object_embedding[object_mask==1]
-        object_mask = object_mask[object_mask==1]
-        if done:
-            self.objgraph.reset()
-            self.objgraph.initialize_graph(object_embedding, object_score, object_category, object_mask, object_position)
-
-        # not_found = not done  # Dense
-        to_add = [True] * int(sum(object_mask))
-
-        if self.config.OBJECTGRAPH.SPARSE:
-            not_found = ~self.found  # Sparse
-        else:
-            not_found = not done  # Dense
-        if not_found:
-            hop1_vis_node = self.imggraph.A[self.imggraph.last_localized_node_idx]
-            hop1_obj_node_mask = np.sum(self.objgraph.A_OV.transpose(1, 0)[hop1_vis_node], 0) > 0
-            curr_obj_node_mask = self.objgraph.A_OV[:, self.imggraph.last_localized_node_idx]
-            neighbor_obj_node_mask = (hop1_obj_node_mask + curr_obj_node_mask) > 0
-            neighbor_node_embedding = self.objgraph.graph_memory[neighbor_obj_node_mask]
-            neighbor_obj_memory_idx = np.where(neighbor_obj_node_mask)[0]
-            neighbor_obj_memory_score = self.objgraph.graph_score[neighbor_obj_memory_idx]
-            neighbor_obj_memory_cat = self.objgraph.graph_category[neighbor_obj_memory_idx]
-
-            close, prob = self.is_close(neighbor_node_embedding, object_embedding, return_prob=True, th=self.obj_node_th)
-            for c_i in range(prob.shape[1]):
-                close_mem_indices = np.where(close[:, c_i] == 1)[0]
-                # detection score 높은 순으로 체크
-                for m_i in close_mem_indices:
-                    is_same = False
-                    to_update = False
-                    # m_i = neighbor_obj_memory_idx[close_idx]
-                    if (object_category[c_i] == neighbor_obj_memory_cat[m_i]) and object_category[c_i] != -1:
-                        is_same = True
-                        if object_score[c_i] > neighbor_obj_memory_score[m_i]:
-                            to_update = True
-
-                    if is_same:
-                        # 만약 새로 detect한 물체가 이미 메모리에 있는 물체라면 새로 추가하지 않는다
-                        to_add[c_i] = False
-
-                    if to_update:
-                        # 만약 새로 detect한 물체가 이미 메모리에 있는 물체고 새로 detect한 물체의 score가 높다면 메모리를 새 물체로 업데이트 해준다
-                        self.objgraph.update_node(m_i, time, object_score[c_i], object_category[c_i], int(self.imggraph.last_localized_node_idx), object_embedding[c_i])
-                        break
-
-            # Add new objects to graph
-            if sum(to_add) > 0:
-                start_node_idx = self.objgraph.num_node()
-                new_idx = np.where(np.stack(to_add))[0]
-                self.objgraph.add_node(start_node_idx, object_embedding[new_idx], object_score[new_idx],
-                                          object_category[new_idx], object_mask[new_idx], time,
-                                          object_position[new_idx],  int(self.imggraph.last_localized_node_idx))
-
-    def update_image_graph(self, new_embedding, curr_obj_embeding, obs, done):
-        # The position is only used for visualizations.
-        position, rotation, time = obs['position'], obs['rotation'],  obs['step']
-        if done:
-            self.imggraph.reset()
-            self.imggraph.initialize_graph(new_embedding, position, rotation)
-
-        obj_close = True
-        obj_graph_mask = self.objgraph.graph_score[self.objgraph.A_OV[:, self.imggraph.last_localized_node_idx]] > 0.5
-        if len(obj_graph_mask) > 0:
-            curr_obj_mask = obs['object_score'] > 0.5
-            if np.sum(curr_obj_mask) / len(curr_obj_mask) >= 0.5:
-                close_obj, prob_obj = self.is_close(self.objgraph.graph_memory[self.objgraph.A_OV[:, self.imggraph.last_localized_node_idx]], curr_obj_embeding, return_prob=True, th=self.obj_node_th)
-                close_obj = close_obj[obj_graph_mask, :][:, curr_obj_mask]
-                category_mask = self.objgraph.graph_category[self.objgraph.A_OV[:, self.imggraph.last_localized_node_idx]][obj_graph_mask][:, None] == obs['object_category'][curr_obj_mask]
-                close_obj[~category_mask] = False
-                if len(close_obj) >= 3:
-                    clos_obj_p = close_obj.any(1).sum() / (close_obj.shape[0])
-                    if clos_obj_p < 0.1:  # Fail to localize (find the same object) with the last localized frame
-                        obj_close = False
-
-        close, prob = self.is_close(self.imggraph.last_localized_node_embedding[None], new_embedding[None], return_prob=True, th=self.img_node_th)
-        # print("image prob", prob[0])
-
-        found = (np.array(done) + close.squeeze()) & np.array(obj_close).squeeze()
-        # found = np.array(done) + close.squeeze()  # (T,T): is in 0 state, (T,F): not much moved, (F,T): impossible, (F,F): moved much
-        self.found_prev = False
-        self.found = found
-        self.found_in_memory = False
-        to_add = False
-        if found:
-            self.imggraph.update_nodes(self.imggraph.last_localized_node_idx, time)
-            self.found_prev = True
-        else:
-            # 모든 메모리 노드 체크
-            check_list = 1 - self.imggraph.graph_mask[:self.imggraph.num_node()]
-            # 바로 직전 노드는 체크하지 않는다.
-            check_list[self.imggraph.last_localized_node_idx] = 1.0
-            while not found:
-                not_checked_yet = np.where((1 - check_list))[0]
-                neighbor_embedding = self.imggraph.graph_memory[not_checked_yet]
-                num_to_check = len(not_checked_yet)
-                if num_to_check == 0:
-                    # 과거의 노드와도 다르고, 메모리와도 모두 다르다면 새로운 노드로 추가
-                    to_add = True
-                    break
-                else:
-                    # 메모리 노드에 존재하는지 체크
-                    close, prob = self.is_close(new_embedding[None], neighbor_embedding, return_prob=True, th=self.img_node_th)
-                    close = close[0];  prob = prob[0]
-                    close_idx = np.where(close)[0]
-                    if len(close_idx) >= 1:
-                        found_node = not_checked_yet[prob.argmax()]
-                    else:
-                        found_node = None
-                    if found_node is not None:
-                        found = True
-                        if abs(time - self.imggraph.graph_time[found_node]) > 20:
-                            self.found_in_memory = True #만약 새롭게 찾은 노드가 오랜만에 돌아온 노드라면 found_in_memory를 True로 바꿔준다
-                        self.imggraph.update_node(found_node, time, new_embedding)
-                        self.imggraph.add_edge(found_node, self.imggraph.last_localized_node_idx)
-                        self.imggraph.record_localized_state(found_node, new_embedding)
-                    check_list[found_node] = 1.0
-
-        if to_add:
-            new_node_idx = self.imggraph.num_node()
-            self.imggraph.add_node(new_node_idx, new_embedding, time, position, rotation)
-            self.imggraph.add_edge(new_node_idx, self.imggraph.last_localized_node_idx)
-            self.imggraph.record_localized_state(new_node_idx, new_embedding)
-        self.last_localized_node_idx = self.imggraph.last_localized_node_idx
+    #
+    # def update_object_graph(self, object_embedding, obs, done):
+    #     object_score, object_category, object_mask, object_position, object_bboxes, time = \
+    #         obs['object_score'], obs['object_category'], obs['object_mask'], obs['object_pose'], obs['object'], obs['step']
+    #     # The position is only used for visualizations. Remove if object features are similar
+    #     # object masking
+    #     object_score = object_score[object_mask==1]
+    #     object_category = object_category[object_mask==1]
+    #     object_position = object_position[object_mask==1]
+    #     object_embedding = object_embedding[object_mask==1]
+    #     object_mask = object_mask[object_mask==1]
+    #     if done:
+    #         self.objgraph.reset()
+    #         self.objgraph.initialize_graph(object_embedding, object_score, object_category, object_mask, object_position)
+    #
+    #     # not_found = not done  # Dense
+    #     to_add = [True] * int(sum(object_mask))
+    #
+    #     if self.config.OBJECTGRAPH.SPARSE:
+    #         not_found = ~self.found  # Sparse
+    #     else:
+    #         not_found = not done  # Dense
+    #     if not_found:
+    #         hop1_vis_node = self.imggraph.A[self.imggraph.last_localized_node_idx]
+    #         hop1_obj_node_mask = np.sum(self.objgraph.A_OV.transpose(1, 0)[hop1_vis_node], 0) > 0
+    #         curr_obj_node_mask = self.objgraph.A_OV[:, self.imggraph.last_localized_node_idx]
+    #         neighbor_obj_node_mask = (hop1_obj_node_mask + curr_obj_node_mask) > 0
+    #         neighbor_node_embedding = self.objgraph.graph_memory[neighbor_obj_node_mask]
+    #         neighbor_obj_memory_idx = np.where(neighbor_obj_node_mask)[0]
+    #         neighbor_obj_memory_score = self.objgraph.graph_score[neighbor_obj_memory_idx]
+    #         neighbor_obj_memory_cat = self.objgraph.graph_category[neighbor_obj_memory_idx]
+    #
+    #         close, prob = self.is_close(neighbor_node_embedding, object_embedding, return_prob=True, th=self.obj_node_th)
+    #         for c_i in range(prob.shape[1]):
+    #             close_mem_indices = np.where(close[:, c_i] == 1)[0]
+    #             # detection score 높은 순으로 체크
+    #             for m_i in close_mem_indices:
+    #                 is_same = False
+    #                 to_update = False
+    #                 # m_i = neighbor_obj_memory_idx[close_idx]
+    #                 if (object_category[c_i] == neighbor_obj_memory_cat[m_i]) and object_category[c_i] != -1:
+    #                     is_same = True
+    #                     if object_score[c_i] > neighbor_obj_memory_score[m_i]:
+    #                         to_update = True
+    #
+    #                 if is_same:
+    #                     # 만약 새로 detect한 물체가 이미 메모리에 있는 물체라면 새로 추가하지 않는다
+    #                     to_add[c_i] = False
+    #
+    #                 if to_update:
+    #                     # 만약 새로 detect한 물체가 이미 메모리에 있는 물체고 새로 detect한 물체의 score가 높다면 메모리를 새 물체로 업데이트 해준다
+    #                     self.objgraph.update_node(m_i, time, object_score[c_i], object_category[c_i], int(self.imggraph.last_localized_node_idx), object_embedding[c_i])
+    #                     break
+    #
+    #         # Add new objects to graph
+    #         if sum(to_add) > 0:
+    #             start_node_idx = self.objgraph.num_node()
+    #             new_idx = np.where(np.stack(to_add))[0]
+    #             self.objgraph.add_node(start_node_idx, object_embedding[new_idx], object_score[new_idx],
+    #                                       object_category[new_idx], object_mask[new_idx], time,
+    #                                       object_position[new_idx],  int(self.imggraph.last_localized_node_idx))
+    #
+    # def update_image_graph(self, new_embedding, curr_obj_embeding, obs, done):
+    #     # The position is only used for visualizations.
+    #     position, rotation, time = obs['position'], obs['rotation'],  obs['step']
+    #     if done:
+    #         self.imggraph.reset()
+    #         self.imggraph.initialize_graph(new_embedding, position, rotation)
+    #
+    #     obj_close = True
+    #     obj_graph_mask = self.objgraph.graph_score[self.objgraph.A_OV[:, self.imggraph.last_localized_node_idx]] > 0.5
+    #     if len(obj_graph_mask) > 0:
+    #         curr_obj_mask = obs['object_score'] > 0.5
+    #         if np.sum(curr_obj_mask) / len(curr_obj_mask) >= 0.5:
+    #             close_obj, prob_obj = self.is_close(self.objgraph.graph_memory[self.objgraph.A_OV[:, self.imggraph.last_localized_node_idx]], curr_obj_embeding, return_prob=True, th=self.obj_node_th)
+    #             close_obj = close_obj[obj_graph_mask, :][:, curr_obj_mask]
+    #             category_mask = self.objgraph.graph_category[self.objgraph.A_OV[:, self.imggraph.last_localized_node_idx]][obj_graph_mask][:, None] == obs['object_category'][curr_obj_mask]
+    #             close_obj[~category_mask] = False
+    #             if len(close_obj) >= 3:
+    #                 clos_obj_p = close_obj.any(1).sum() / (close_obj.shape[0])
+    #                 if clos_obj_p < 0.1:  # Fail to localize (find the same object) with the last localized frame
+    #                     obj_close = False
+    #
+    #     close, prob = self.is_close(self.imggraph.last_localized_node_embedding[None], new_embedding[None], return_prob=True, th=self.img_node_th)
+    #     # print("image prob", prob[0])
+    #
+    #     found = (np.array(done) + close.squeeze()) & np.array(obj_close).squeeze()
+    #     # found = np.array(done) + close.squeeze()  # (T,T): is in 0 state, (T,F): not much moved, (F,T): impossible, (F,F): moved much
+    #     self.found_prev = False
+    #     self.found = found
+    #     self.found_in_memory = False
+    #     to_add = False
+    #     if found:
+    #         self.imggraph.update_nodes(self.imggraph.last_localized_node_idx, time)
+    #         self.found_prev = True
+    #     else:
+    #         # 모든 메모리 노드 체크
+    #         check_list = 1 - self.imggraph.graph_mask[:self.imggraph.num_node()]
+    #         # 바로 직전 노드는 체크하지 않는다.
+    #         check_list[self.imggraph.last_localized_node_idx] = 1.0
+    #         while not found:
+    #             not_checked_yet = np.where((1 - check_list))[0]
+    #             neighbor_embedding = self.imggraph.graph_memory[not_checked_yet]
+    #             num_to_check = len(not_checked_yet)
+    #             if num_to_check == 0:
+    #                 # 과거의 노드와도 다르고, 메모리와도 모두 다르다면 새로운 노드로 추가
+    #                 to_add = True
+    #                 break
+    #             else:
+    #                 # 메모리 노드에 존재하는지 체크
+    #                 close, prob = self.is_close(new_embedding[None], neighbor_embedding, return_prob=True, th=self.img_node_th)
+    #                 close = close[0];  prob = prob[0]
+    #                 close_idx = np.where(close)[0]
+    #                 if len(close_idx) >= 1:
+    #                     found_node = not_checked_yet[prob.argmax()]
+    #                 else:
+    #                     found_node = None
+    #                 if found_node is not None:
+    #                     found = True
+    #                     if abs(time - self.imggraph.graph_time[found_node]) > 20:
+    #                         self.found_in_memory = True #만약 새롭게 찾은 노드가 오랜만에 돌아온 노드라면 found_in_memory를 True로 바꿔준다
+    #                     self.imggraph.update_node(found_node, time, new_embedding)
+    #                     self.imggraph.add_edge(found_node, self.imggraph.last_localized_node_idx)
+    #                     self.imggraph.record_localized_state(found_node, new_embedding)
+    #                 check_list[found_node] = 1.0
+    #
+    #     if to_add:
+    #         new_node_idx = self.imggraph.num_node()
+    #         self.imggraph.add_node(new_node_idx, new_embedding, time, position, rotation)
+    #         self.imggraph.add_edge(new_node_idx, self.imggraph.last_localized_node_idx)
+    #         self.imggraph.record_localized_state(new_node_idx, new_embedding)
+    #     self.last_localized_node_idx = self.imggraph.last_localized_node_idx
 
     def embed_obs(self, obs):
         with torch.no_grad():
-            img_tensor = torch.cat((torch.tensor(obs['panoramic_rgb'][None]).to(self.torch_device).float() / 255.,
-                                    torch.tensor(obs['panoramic_depth'][None]).to(self.torch_device).float()), 3).permute(0, 3, 1, 2)
-            vis_embedding = nn.functional.normalize(self.img_encoder(img_tensor).view(-1, self.feature_dim), dim=1)
-        return vis_embedding[0].cpu().detach().numpy()
+            img_tensor = (torch.tensor(obs['panoramic_rgb'][None]).to(self.torch_device).float() / 255).permute(0, 3, 1, 2)
+            img_embedding = nn.functional.normalize(self.img_encoder(img_tensor).view(-1, self.feature_dim), dim=1)
+        return img_embedding[0].cpu().detach().numpy()
 
     def embed_target(self, obs):
         with torch.no_grad():
-            img_tensor = obs['target_goal'].permute(0, 3, 1, 2)
-            vis_embedding = nn.functional.normalize(self.img_encoder(img_tensor).view(-1, self.feature_dim), dim=1)
-        return vis_embedding[0].cpu().detach().numpy()
+            img_tensor = obs['target_goal'][...,:3].permute(0, 3, 1, 2)
+            img_embedding = nn.functional.normalize(self.img_encoder(img_tensor).view(-1, self.feature_dim), dim=1)
+        return img_embedding[0].cpu().detach().numpy()
 
     def embed_object(self, obs):
         with torch.no_grad():
@@ -259,19 +269,19 @@ class ImageGoalGraphEnv(ImageGoalEnv):
     def build_graph(self, obs, reset=False):
         if not reset:
             obs, reward, done, info = obs
-        curr_vis_embeddings = self.embed_obs(obs)
+        curr_img_embeddings = self.embed_obs(obs)
         curr_object_embedding = self.embed_object(obs)
         if reset:
             self.imggraph.reset()
-            self.imggraph.initialize_graph(curr_vis_embeddings, obs['position'], obs['rotation'])
+            self.imggraph.initialize_graph(curr_img_embeddings, obs['position'], obs['rotation'])
         else:
-            self.update_image_graph(curr_vis_embeddings, curr_object_embedding, obs, done=False)
+            self.imggraph = update_image_graph(self.imggraph, self.objgraph, curr_img_embeddings, curr_object_embedding, obs, done=False)
         img_memory_dict = self.get_img_memory()
         if reset:
             self.objgraph.reset()
             self.objgraph.initialize_graph(curr_object_embedding, obs['object_score'], obs['object_category'], obs['object_mask'], obs['object_pose'])
         else:
-            self.update_object_graph(curr_object_embedding, obs, done=False)
+            self.objgraph = update_object_graph(self.imggraph, self.objgraph, curr_object_embedding, obs, done=False)
         obj_memory_dict = self.get_obj_memory()
         obs = self.add_memory_in_obs(obs, img_memory_dict, obj_memory_dict)
         if self.args.render:
