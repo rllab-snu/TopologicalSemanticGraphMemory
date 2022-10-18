@@ -48,7 +48,7 @@ def collect_graph(data_list):
     graph_dir = os.path.join(args.record_dir, 'graph', args.split)
     with torch.no_grad():
         for data_path in data_list:
-            batch = pull_image(data_path[0], config)
+            batch = pull_image(data_path, config)
             record_graphs = []
             for t in range(batch['panoramic_rgb'].shape[0]):
                 obs_t = {
@@ -199,5 +199,5 @@ if __name__=='__main__':
                 data_list.remove(ef)
     num_data = len(data_list)
     data_list = np.stack(sorted(data_list))
-    collect_graph(data_list)
-    # parmap.map(collect_graph, data_list, pm_processes = args.num_procs)
+    # collect_graph(data_list)
+    parmap.map(collect_graph, data_list, pm_processes = args.num_procs)
