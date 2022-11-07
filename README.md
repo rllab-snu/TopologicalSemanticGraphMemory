@@ -2,7 +2,7 @@
 
 This repository contains a Pytorch implementation of our CoRL 2022 **<span style="color: rgb(255, 95, 0)">oral</span>** paper:
 
-###*[Topological Semantic Graph Memory for Image Goal Navigation](https://arxiv.org/pdf/2209.08274.pdf)* <br>
+### *[Topological Semantic Graph Memory for Image Goal Navigation](https://arxiv.org/pdf/2209.08274.pdf)* <br>
 Nuri Kim, Obin Kwon, Hwiyeon Yoo, Yunho Choi, Jeongho Park, Songhwai Oh <br>
 Seoul National University
 
@@ -134,17 +134,7 @@ Or, you can evaluate the pretrained model with:
 ```
 python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --eval-ckpt ./data/best_ckpts/tsgm_rl.pth --gpu 0
 ```
-
-### Results
-Expected results for TSGM from running the code
-
-|  Model  |                              Test set                               | Easy (SR) | Easy (SPL) | Medium (SR) | Medium (SPL) |  Hard (SR)   | Hard (SPL) | Overall (SR) | Overall (SPL) |
-|:-------:|:-------------------------------------------------------------------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:------------:|:-------------:|
-| TSGM-IL |      [VGM](https://rllab-snu.github.io/projects/vgm/doc.html)       |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |    70.97     |      52.81    |
-| TSGM-RL |      [VGM](https://rllab-snu.github.io/projects/vgm/doc.html)       |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
-| TSGM-RL |         [NRNS-straight](https://github.com/meera1hahn/NRNS)         |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
-| TSGM-RL |          [NRNS-curved](https://github.com/meera1hahn/NRNS)          |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
-| TSGM-RL |  [Meta](https://github.com/facebookresearch/image-goal-nav-dataset) |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
+* Trained model parameters will be released soon.
 
 ### Visualize the Results
 To visualize the TSGM from the recorded output from the evaluate (test with --record 3), please run the following command:
@@ -161,6 +151,7 @@ We release pre-trained models from the experiments in our paper:
 | Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar]() |
 | Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar]() |
 
+* Checkpoint will be released soon.
 
 ## Citation
 If you find this code useful for your research, please consider citing:
