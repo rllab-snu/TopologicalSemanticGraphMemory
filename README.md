@@ -134,17 +134,25 @@ Or, you can evaluate the pretrained model with:
 ```
 python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --eval-ckpt ./data/best_ckpts/tsgm_rl.pth --gpu 0
 ```
+* Trained model parameters will be released soon.
 
-### Results
-Expected results for TSGM from running the code
+[//]: # (### Results)
 
-|  Model  |                              Test set                               | Easy (SR) | Easy (SPL) | Medium (SR) | Medium (SPL) |  Hard (SR)   | Hard (SPL) | Overall (SR) | Overall (SPL) |
-|:-------:|:-------------------------------------------------------------------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:------------:|:-------------:|
-| TSGM-IL |      [VGM](https://rllab-snu.github.io/projects/vgm/doc.html)       |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |    70.97     |      52.81    |
-| TSGM-RL |      [VGM](https://rllab-snu.github.io/projects/vgm/doc.html)       |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
-| TSGM-RL |         [NRNS-straight](https://github.com/meera1hahn/NRNS)         |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
-| TSGM-RL |          [NRNS-curved](https://github.com/meera1hahn/NRNS)          |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
-| TSGM-RL |  [Meta](https://github.com/facebookresearch/image-goal-nav-dataset) |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |
+[//]: # (Expected results for TSGM from running the code)
+
+[//]: # (|  Model  |                              Test set                               | Easy &#40;SR&#41; | Easy &#40;SPL&#41; | Medium &#40;SR&#41; | Medium &#40;SPL&#41; |  Hard &#40;SR&#41;   | Hard &#40;SPL&#41; | Overall &#40;SR&#41; | Overall &#40;SPL&#41; |)
+
+[//]: # (|:-------:|:-------------------------------------------------------------------:|:---------:|:----------:|:-----------:|:------------:|:------------:|:----------:|:------------:|:-------------:|)
+
+[//]: # (| TSGM-IL |      [VGM]&#40;https://rllab-snu.github.io/projects/vgm/doc.html&#41;       |   76.76   |   59.54    |    72.99    |    53.67     |    63.16     |   45.21    |    70.97     |      52.81    |)
+
+[//]: # (| TSGM-RL |      [VGM]&#40;https://rllab-snu.github.io/projects/vgm/doc.html&#41;       |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |)
+
+[//]: # (| TSGM-RL |         [NRNS-straight]&#40;https://github.com/meera1hahn/NRNS&#41;         |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |)
+
+[//]: # (| TSGM-RL |          [NRNS-curved]&#40;https://github.com/meera1hahn/NRNS&#41;          |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |)
+
+[//]: # (| TSGM-RL |  [Meta]&#40;https://github.com/facebookresearch/image-goal-nav-dataset&#41; |     aa    |    aa     |     aa      |      aa      |     aa       |     aa      |      aa      |      aa       |)
 
 ### Visualize the Results
 To visualize the TSGM from the recorded output from the evaluate (test with --record 3), please run the following command:
@@ -161,6 +169,7 @@ We release pre-trained models from the experiments in our paper:
 | Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar]() |
 | Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar]() |
 
+* Checkpoint will be released soon.
 
 ## Citation
 If you find this code useful for your research, please consider citing:
