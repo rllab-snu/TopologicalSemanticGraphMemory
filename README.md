@@ -173,6 +173,7 @@ If you find this code useful for your research, please consider citing:
 }
 ```
 
+
 ## Acknowledgements
 In our work, we used parts of [VGM](https://rllab-snu.github.io/projects/vgm/doc.html), 
 and [Habitat-Lab](https://github.com/facebookresearch/habitat-lab) repos and extended them.
