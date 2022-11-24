@@ -30,7 +30,7 @@ the success rate and +7.0-23.5% on SPL, which means that the TSGM finds <span  s
 
 ## Demonstration
 
-To visualize the TSGM generation, run the jupyter notebook [build_tsgm_demo](demo/build_tsgm_demo.ipython).
+To visualize the TSGM generation, run the jupyter notebook [build_tsgm_demo](demo/build_tsgm_demo.ipynb).
 This notebook will show the online TSGM generation during *w/a/s/d control* on the simulator.
 The rendering window will show the generated TSGM and the observations as follows:
 ![tsgm_demo](demo/tsgm_demo.gif)
