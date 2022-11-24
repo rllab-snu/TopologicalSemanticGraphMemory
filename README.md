@@ -36,7 +36,7 @@ The rendering window will show the generated TSGM and the observations as follow
 ![tsgm_demo](demo/tsgm_demo.gif)
 Note that the top-down map and pose information are only used for visualization, not for the graph generation. 
 
-To check the effectiveness of the object encoder, run the jupyter notebook [object_encoder](demo/object_encoder.ipython).
+To check the effectiveness of the object encoder, run the jupyter notebook [object_encoder](demo/object_encoder.ipynb).
 
 ## Installation
 The source code is developed and tested in the following setting. 
