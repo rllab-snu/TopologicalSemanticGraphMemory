@@ -87,7 +87,7 @@ habitat-lab
 
 ## Download Data
 
-You can download the data [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EoYVFXO2_3lNhho_7LdmAU4B9A669tgjNbSd0ukc_AKXtQ?e=E8h6oB).
+You can download the whole data [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EoYVFXO2_3lNhho_7LdmAU4B9A669tgjNbSd0ukc_AKXtQ?e=E8h6oB).
 
 
 ## Creating Datasets
