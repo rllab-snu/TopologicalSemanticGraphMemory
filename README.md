@@ -87,7 +87,7 @@ habitat-lab
 
 ## Download Data
 
-You can download the whole data [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EoYVFXO2_3lNhho_7LdmAU4B9A669tgjNbSd0ukc_AKXtQ?e=E8h6oB).
+You can download the whole data [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EoYVFXO2_3lNhho_7LdmAU4B9A669tgjNbSd0ukc_AKXtQ?e=eRheUZ).
 
 
 ## Creating Datasets
@@ -97,7 +97,7 @@ You can download the whole data [here](https://mysnu-my.sharepoint.com/:f:/g/per
     ```
     This will generate the data for imitation learning. (takes around ~24hours)
     You can find some examples of the collected data in *IL_data/gibson* folder, and look into them with  *show_IL_data.ipynb*.
-    You can also download the collected il data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EkGTdtVgaMVCvPMHNDjsxlcBoSN2wwzn83gXeF7vT2_Dfg?e=0C1HBD).
+    You can also download the collected il data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EkGTdtVgaMVCvPMHNDjsxlcBoSN2wwzn83gXeF7vT2_Dfg?e=4lBlfZ).
 
 2. Collect Topological Semantic Graph for Imitation Learning 
     ```
@@ -105,7 +105,7 @@ You can download the whole data [here](https://mysnu-my.sharepoint.com/:f:/g/per
     ```
     This will generate the graph data for training the TSGM model. (takes around ~3hours)
     You can find some examples of the collected graph data in *IL_data/gibson_graph* folder, and look into them with  *show_graph_data.ipynb*.
-    You can also download the collected graph data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EmvaMrQID5NKoQ7SA04eu-gBSIgiDESRznpR7qLw2zjmJQ?e=bPF85T).
+    You can also download the collected graph data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EmvaMrQID5NKoQ7SA04eu-gBSIgiDESRznpR7qLw2zjmJQ?e=Ed2alj).
 
 ## Training
 1. Imitation Learning
@@ -157,10 +157,10 @@ We release pre-trained models from the experiments in our paper:
 
 |      Method       |                    Train                    |       Checkpoints       |
 |:-----------------:|:-------------------------------------------:|:-----------------------:|
-|       TSGM        |             Imitation Learning              |     [tsgm_il.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EfCG8qKkuIFCjQrj2LIqIKYBKXuJ1NV2dzsrV9HuXIsADQ?e=xjm146)     |
-|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EbYjg9RZoH5JoZvr941A2mMBvwlGyJAexdychHVQUAYirw?e=Hq8WTo)     |
-| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/Eb6Xa9AdaLVJmqbIrujfIeMBfor6bA_svioih4R2XGPIkA?e=xm4hhE) |
-| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/ESJwR8YHqgRNpErupUo2DVEBf9k7csRECl6hyDA3Xs5seQ?e=hIEBPN) |
+|       TSGM        |             Imitation Learning              |     [tsgm_il.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EfCG8qKkuIFCjQrj2LIqIKYBKXuJ1NV2dzsrV9HuXIsADQ?e=abto3d)     |
+|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EbYjg9RZoH5JoZvr941A2mMBvwlGyJAexdychHVQUAYirw?e=3BZENR)     |
+| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/Eb6Xa9AdaLVJmqbIrujfIeMBfor6bA_svioih4R2XGPIkA?e=ZyIJcU) |
+| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/ESJwR8YHqgRNpErupUo2DVEBf9k7csRECl6hyDA3Xs5seQ?e=gJbbok) |
 
 ## Citation
 If you find this code useful for your research, please consider citing:
