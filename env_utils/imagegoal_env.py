@@ -125,13 +125,13 @@ class ImageGoalEnv(RLEnv):
         }
         obs_dict['object'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects, 5), dtype=np.float32)
         obs_dict['object_score'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects,), dtype=np.float32)
-        obs_dict['object_mask'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects,), dtype=np.bool)
+        obs_dict['object_mask'] = Box(low=0, high=1, shape=(self.config.memory.num_objects,), dtype=np.bool)
         obs_dict['object_relpose'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects, 2), dtype=np.float32)
         obs_dict['object_category'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects,), dtype=np.float32)
         obs_dict['object_depth'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects,), dtype=np.float32)
         obs_dict['target_loc_object'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects, 5), dtype=np.float32)
         obs_dict['target_loc_object_score'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects,), dtype=np.float32)
-        obs_dict['target_loc_object_mask'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects,), dtype=np.bool)
+        obs_dict['target_loc_object_mask'] = Box(low=0, high=1, shape=(self.config.memory.num_objects,), dtype=np.bool)
         obs_dict['target_loc_object_category'] = Box(low=-np.Inf, high=np.Inf, shape=(self.config.memory.num_objects,), dtype=np.float32)
         self.mapper = self.habitat_env.task.measurements.measures['top_down_map'] if (self.render_map) else None
         if self.mapper and getattr(config, 'map_more', False):
