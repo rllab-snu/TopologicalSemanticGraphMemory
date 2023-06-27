@@ -450,7 +450,7 @@ def evaluate(eval_config, state_dict, ckpt_config):
     print('total softspl : %.4f'%(np.array(softspl).mean()))
     print('total dtg : %.4f'%(np.array(dtg).mean()))
     print('total timesteps : %.3f'%(np.array(total_success_timesteps).mean()))
-    env.close()
+    # env.close()
     if args.wandb:
         wandb.alert(
             title="Performance",
