@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 from env_utils.imagegoal_env import ImageGoalEnv
-# from model.Graph.resnet_img import resnet18 as resnet18_img
 from torchvision.models import resnet18 as resnet18_img
 from model.Graph.resnet_obj import resnet18 as resnet18_obj
 from model.Graph.graph import ImgGraph, ObjGraph
