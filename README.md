@@ -89,6 +89,21 @@ habitat-lab
 
 You can download the whole data [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EoYVFXO2_3lNhho_7LdmAU4B9A669tgjNbSd0ukc_AKXtQ?e=eRheUZ).
 
+Place the data like this:
+```
+TopologicalSemanticGraphMemory
+  └── data
+      └── assets
+      └── episodes
+      └── noise_models
+      └── scene_info
+      └── pretrained_models
+      └── detector
+      └── graph
+        └── gibson
+            └── Img_encoder.pth.tar
+            └── Obj_encoder.pth.tar
+```
 
 ## Creating Datasets
 1. Data Generation for Imitation Learning 
@@ -132,7 +147,7 @@ This will evaluate the trained model in *./data/checkpoints/{$version_name}_{$ta
 
 Or, you can evaluate the pretrained model with:
 ```
-python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --eval-ckpt ./data/best_ckpts/tsgm_rl.pth --gpu 0
+python evaluate.py --config configs/TSGM.yaml --version version_name --diff hard --eval-ckpt data/pretrained_models/tsgm_hard.pth --gpu 0 --policy TSGMPolicy
 ```
 
 ### Results
@@ -158,7 +173,7 @@ We release pre-trained models from the experiments in our paper:
 |      Method       |                    Train                    |       Checkpoints       |
 |:-----------------:|:-------------------------------------------:|:-----------------------:|
 |       TSGM        |             Imitation Learning              |     [tsgm_il.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EfCG8qKkuIFCjQrj2LIqIKYBKXuJ1NV2dzsrV9HuXIsADQ?e=abto3d)     |
-|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EbYjg9RZoH5JoZvr941A2mMBvwlGyJAexdychHVQUAYirw?e=3BZENR)     |
+|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EZMcLUeVJRlJjMDGiNWNoXcBY6LLN9MpGNn6Sz4RjrbskA?e=xgXWBp)     |
 | Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/Eb6Xa9AdaLVJmqbIrujfIeMBfor6bA_svioih4R2XGPIkA?e=ZyIJcU) |
 | Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/ESJwR8YHqgRNpErupUo2DVEBf9k7csRECl6hyDA3Xs5seQ?e=gJbbok) |
 

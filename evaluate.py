@@ -25,7 +25,7 @@ parser.add_argument("--gpu", type=str, default="0")
 parser.add_argument("--version", type=str, required=True)
 parser.add_argument("--diff", choices=['random', 'easy', 'medium', 'hard'], default='')
 parser.add_argument("--split", choices=['val', 'train', 'val_mini', 'test'], default='val')
-parser.add_argument('--eval-ckpt', type=str, required=True)
+parser.add_argument('--eval-ckpt', type=str, default='data/checkpoints')
 parser.add_argument('--record', choices=['0','1','2','3'], default='0') # 0: no record 1: env.render 2: pose + action numerical traj 3: features
 parser.add_argument('--project-dir', default='.', type=str)
 parser.add_argument('--dataset', default='gibson' , type=str)
@@ -38,7 +38,7 @@ parser.add_argument('--detector-th', default=0.1, type=float)
 parser.add_argument('--wandb', action='store_true', default=False)
 parser.add_argument('--mode', default='eval', type=str)
 parser.add_argument('--episode_name', default='VGM', type=str) #[VGM, NRNS_curved, NRNS_straight]
-parser.add_argument('--policy', default='TSGMPolicy', required=True, type=str)
+parser.add_argument('--policy', default='TSGMPolicy', type=str)
 parser.add_argument('--coverage', action='store_true', default=False)
 parser.add_argument('--fd', action='store_true', default=False, help="use finetuned detector")
 parser.add_argument('--obj-score-th', default=0.1, type=float)
@@ -115,7 +115,7 @@ def eval_config(args):
 
 def load(ckpt):
     if ckpt != 'none':
-        sd = torch.load(ckpt,map_location=torch.device('cpu'))
+        sd = torch.load(ckpt, map_location=torch.device('cpu'))
         state_dict = sd['state_dict']
         new_state_dict = {}
         for key in state_dict.keys():
@@ -450,7 +450,7 @@ def evaluate(eval_config, state_dict, ckpt_config):
     print('total softspl : %.4f'%(np.array(softspl).mean()))
     print('total dtg : %.4f'%(np.array(dtg).mean()))
     print('total timesteps : %.3f'%(np.array(total_success_timesteps).mean()))
-    env.close()
+    # env.close()
     if args.wandb:
         wandb.alert(
             title="Performance",
@@ -469,9 +469,9 @@ if __name__=='__main__':
     curr_hostname = os.uname()[1]
     # eval_data_name = os.path.join(args.project_dir, 'results', 'eval_result_{}.dat.gz'.format(curr_hostname))
     args.eval_ckpt = os.path.join(args.project_dir, args.eval_ckpt)
+    os.makedirs(os.path.join(args.project_dir, 'results'), exist_ok=True)
     # Load checked ckpts
     checked_ckpt = []
-    # if os.path.isfile(eval_data_name):
     loaded_dict = False
     cnt = 0
     cnt_name = 0
@@ -521,12 +521,12 @@ if __name__=='__main__':
         if last_ckpt not in checked_ckpt:
             ckpt_dir = last_ckpt
             print('start evaluate {} '.format(ckpt_dir))
-            while True:
-                try:
-                    state_dict, ckpt_config = load(ckpt_dir)
-                    break
-                except:
-                    continue
+            state_dict, ckpt_config = load(ckpt_dir)
+            # while True:
+            #     try:
+            #         break
+            #     except:
+            #         continue
 
             if args.record > 0:
                 if not os.path.exists(os.path.join(args.project_dir, args.record_dir, args.version)):
