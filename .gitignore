@@ -6,3 +6,4 @@ train.log
 *.pt
 *.pth
 *.pth.tar
+.vscode
