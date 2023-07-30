@@ -172,10 +172,10 @@ We release pre-trained models from the experiments in our paper:
 
 |      Method       |                    Train                    |       Checkpoints       |
 |:-----------------:|:-------------------------------------------:|:-----------------------:|
-|       TSGM        |             Imitation Learning              |     [tsgm_il.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EfCG8qKkuIFCjQrj2LIqIKYBKXuJ1NV2dzsrV9HuXIsADQ?e=abto3d)     |
-|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/EZMcLUeVJRlJjMDGiNWNoXcBY6LLN9MpGNn6Sz4RjrbskA?e=xgXWBp)     |
-| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/Eb6Xa9AdaLVJmqbIrujfIeMBfor6bA_svioih4R2XGPIkA?e=ZyIJcU) |
-| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar](https://mysnu-my.sharepoint.com/:u:/g/personal/blackfoot_seoul_ac_kr/ESJwR8YHqgRNpErupUo2DVEBf9k7csRECl6hyDA3Xs5seQ?e=gJbbok) |
+|       TSGM        |             Imitation Learning              |     [tsgm_il.pth](https://drive.google.com/file/d/1-M_Jdzi3NoV3Ouc_ypJzbIPxouiXXX2H/view?usp=sharing)     |
+|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://drive.google.com/file/d/1-9cLSxfXwVcs-ef36QQFu8IBoP18qXgs/view?usp=drive_link)     |
+| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar](https://drive.google.com/file/d/13JOUtk68HD-Hl-BBQM8IxrOO8kf0oGpS/view?usp=drive_link) |
+| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar](https://drive.google.com/file/d/12tnqsna14e6vcEwaBgkgznUxN9LbXajP/view?usp=drive_link) |
 
 ## Citation
 If you find this code useful for your research, please consider citing:
