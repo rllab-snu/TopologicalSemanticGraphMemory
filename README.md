@@ -87,7 +87,7 @@ habitat-lab
 
 ## Download Data
 
-You can download the whole data [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EoYVFXO2_3lNhho_7LdmAU4B9A669tgjNbSd0ukc_AKXtQ?e=eRheUZ).
+You can download the whole data [here](https://drive.google.com/drive/folders/1-1yXxfUu8mPMZjcirURU9crs56OeFl4j?usp=sharing).
 
 Place the data like this:
 ```
@@ -112,7 +112,7 @@ TopologicalSemanticGraphMemory
     ```
     This will generate the data for imitation learning. (takes around ~24hours)
     You can find some examples of the collected data in *IL_data/gibson* folder, and look into them with  *show_IL_data.ipynb*.
-    You can also download the collected il data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EkGTdtVgaMVCvPMHNDjsxlcBoSN2wwzn83gXeF7vT2_Dfg?e=4lBlfZ).
+    You can also download the collected il data from [here](https://drive.google.com/drive/folders/1TGzOhSPJRgTSbM23G23OdgTVRF1O4eGd?usp=sharing).
 
 2. Collect Topological Semantic Graph for Imitation Learning 
     ```
@@ -120,7 +120,7 @@ TopologicalSemanticGraphMemory
     ```
     This will generate the graph data for training the TSGM model. (takes around ~3hours)
     You can find some examples of the collected graph data in *IL_data/gibson_graph* folder, and look into them with  *show_graph_data.ipynb*.
-    You can also download the collected graph data from [here](https://mysnu-my.sharepoint.com/:f:/g/personal/blackfoot_seoul_ac_kr/EmvaMrQID5NKoQ7SA04eu-gBSIgiDESRznpR7qLw2zjmJQ?e=Ed2alj).
+    You can also download the collected graph data from [here](https://drive.google.com/drive/folders/12kmNdBh3JP82ZjceLvC3gm8qyYKNHs01?usp=sharing).
 
 ## Training
 1. Imitation Learning
