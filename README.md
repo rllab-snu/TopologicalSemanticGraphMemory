@@ -87,7 +87,7 @@ habitat-lab
 
 ## Download Data
 
-You can download the whole data [here](https://drive.google.com/drive/folders/1-1yXxfUu8mPMZjcirURU9crs56OeFl4j?usp=sharing).
+You can download the whole data [here](https://drive.google.com/drive/folders/1-8srO6kwxf_qxnIWdH6K7AToP_oxWEYg?usp=sharing).
 
 Place the data like this:
 ```
@@ -112,7 +112,7 @@ TopologicalSemanticGraphMemory
     ```
     This will generate the data for imitation learning. (takes around ~24hours)
     You can find some examples of the collected data in *IL_data/gibson* folder, and look into them with  *show_IL_data.ipynb*.
-    You can also download the collected il data from [here](https://drive.google.com/drive/folders/1TGzOhSPJRgTSbM23G23OdgTVRF1O4eGd?usp=sharing).
+    You can also download the collected il data from [here](https://drive.google.com/drive/folders/17hegYiVD5kvb0C1xcEeIm7xzzCLfo3tp?usp=sharing).
 
 2. Collect Topological Semantic Graph for Imitation Learning 
     ```
@@ -120,7 +120,7 @@ TopologicalSemanticGraphMemory
     ```
     This will generate the graph data for training the TSGM model. (takes around ~3hours)
     You can find some examples of the collected graph data in *IL_data/gibson_graph* folder, and look into them with  *show_graph_data.ipynb*.
-    You can also download the collected graph data from [here](https://drive.google.com/drive/folders/12kmNdBh3JP82ZjceLvC3gm8qyYKNHs01?usp=sharing).
+    You can also download the collected graph data from [here](https://drive.google.com/drive/folders/1m4EBHOY6rO0Alwoex1xgOK4hglqDSWjk?usp=sharing).
 
 ## Training
 1. Imitation Learning
@@ -172,10 +172,10 @@ We release pre-trained models from the experiments in our paper:
 
 |      Method       |                    Train                    |       Checkpoints       |
 |:-----------------:|:-------------------------------------------:|:-----------------------:|
-|       TSGM        |             Imitation Learning              |     [tsgm_il.pth](https://drive.google.com/file/d/1-M_Jdzi3NoV3Ouc_ypJzbIPxouiXXX2H/view?usp=sharing)     |
-|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://drive.google.com/file/d/1-9cLSxfXwVcs-ef36QQFu8IBoP18qXgs/view?usp=drive_link)     |
-| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar](https://drive.google.com/file/d/13JOUtk68HD-Hl-BBQM8IxrOO8kf0oGpS/view?usp=drive_link) |
-| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar](https://drive.google.com/file/d/12tnqsna14e6vcEwaBgkgznUxN9LbXajP/view?usp=drive_link) |
+|       TSGM        |             Imitation Learning              |     [tsgm_il.pth](https://drive.google.com/file/d/1OpBbtQ1z_nlU1Pdh6-97NpJ3LCksCbB4/view?usp=sharing)     |
+|       TSGM        | Imitation Learning + Reinforcement Learning |     [tsgm_rl.pth](https://drive.google.com/file/d/1Opn3XPz19acPduDZOWHR61KZFxHjHuoD/view?usp=sharing)     |
+| Image Classifier  |         Self-supervised Clustering          | [Img_encoder.pth.tar](https://drive.google.com/file/d/1RRWIr81ZqTc3fmZ8i9rVhc579wv-xuvM/view?usp=sharing) |
+| Object Classifier |            Supervised Clustering            | [Obj_encoder.pth.tar](https://drive.google.com/file/d/1RNWGW3YQZh58cpsStL9ampyQgcCKVbWT/view?usp=sharing) |
 
 ## Citation
 If you find this code useful for your research, please consider citing:
